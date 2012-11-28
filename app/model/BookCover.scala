@@ -3,13 +3,13 @@ package model
 import xml.Elem
 
 case class BookCover(
-                 size: String,
-                 url: String,
-                 height: Int, // pixels
-                 width: Int // pixels
-                 ) {
+                      size: String,
+                      url: String,
+                      height: Int, // pixels
+                      width: Int // pixels
+                      ) {
 
-  override def toString(): String = {
+  override def toString: String = {
     "HEIGHT: " + height + ", " +
       "WIDTH: " + width + ", " +
       "URL: " + url

@@ -15,7 +15,7 @@ class Book(
             val bookCovers: Map[String, BookCover],
             val offerSummary: OfferSummary) {
 
-  override def toString(): String = {
+  override def toString: String = {
     "TITLE: " + title + "\n" +
       "AUTHORS: " + authors + "\n" +
       "ISBN: " + isbn + "\n" +
@@ -38,7 +38,7 @@ object Book {
     new Book(
       itemAttributesNode \ "ISBN" text,
       itemAttributesNode \ "EAN" text,
-      itemAttributesNode \ "Author" map (f => f text) mkString(", "),
+      itemAttributesNode \ "Author" map (f => f.text) mkString (", "),
       itemAttributesNode \ "Binding" text,
       (itemAttributesNode \ "NumberOfPages" text) toInt,
       itemAttributesNode \ "PublicationDate" text,

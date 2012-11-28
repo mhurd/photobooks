@@ -15,14 +15,14 @@ object Application extends Controller {
   private val client = new AmazonClient(accessKey, secretKey, associateTag)
 
   private def prettyPrintXml(xml: Elem): String = {
-      val pretty = new PrettyPrinter(80, 2)
-      pretty.format(xml)
-    }
+    val pretty = new PrettyPrinter(80, 2)
+    pretty.format(xml)
+  }
 
-    def index = Action {
-      val xml = client.findByIsbn("9780292739635")
-      val book = Book.fromXml(xml)
-      Ok(views.html.index(book.toString(), book.bookCovers.get("Large").get.url))
-    }
-  
+  def index = Action {
+    val xml = client.findByIsbn("9780292739635")
+    val book = Book.fromXml(xml)
+    Ok(views.html.index(book.toString(), book.bookCovers.get("Large").get.url))
+  }
+
 }

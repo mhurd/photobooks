@@ -12,7 +12,7 @@ import org.apache.commons.codec.binary.Base64
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 import java.net.{InetSocketAddress, URLEncoder}
-import xml.{Elem, PrettyPrinter}
+import xml.Elem
 import scala.Predef._
 
 case class AmazonClient(private val accessKey: String, private val secretKey: String, private val associateTag: String) {
@@ -35,8 +35,8 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
   // HTTP client constants
   private val DEFAULT_TCP_TIMEOUT = Duration.fromTimeUnit(7, TimeUnit.SECONDS)
   private val DEFAULT_TIMEOUT = Duration.fromTimeUnit(5, TimeUnit.SECONDS)
-  private val HOST_CONNECTION_LIMIT = 1;
-  private val DEFAULT_HTTP_PORT = 80;
+  private val HOST_CONNECTION_LIMIT = 1
+  private val DEFAULT_HTTP_PORT = 80
 
   // Base arguments for the Amazon API request
   private val BASIC_ARGUMENTS = SortedMap(
@@ -57,7 +57,7 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
     .tcpConnectTimeout(DEFAULT_TCP_TIMEOUT)
     .build()
 
-  private def getIso8601TimestampString(): String = {
+  private def getIso8601TimestampString: String = {
     val format = new java.text.SimpleDateFormat(ISO_8601_TIMESTAMP_FORMAT)
     format.format(new java.util.Date())
   }
@@ -73,16 +73,18 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
   }
 
   private def mergeArguments(arguments: SortedMap[String, String]): String = {
-    val mergedArguments: SortedMap[String, String] = BASIC_ARGUMENTS ++ arguments + (("Timestamp" -> getIso8601TimestampString()))
-    val f = {(p: (String, String)) => percentEncodeRfc3986(p._1) + "=" + percentEncodeRfc3986(p._2)}
+    val mergedArguments: SortedMap[String, String] = BASIC_ARGUMENTS ++ arguments + (("Timestamp" -> getIso8601TimestampString))
+    val f = {
+      (p: (String, String)) => percentEncodeRfc3986(p._1) + "=" + percentEncodeRfc3986(p._2)
+    }
     mergedArguments.map(f).mkString("&")
   }
 
   private def getSignedUrl(arguments: SortedMap[String, String]): String = {
     val args = mergeArguments(arguments)
     val toSign = "GET" + "\n" + AMAZON_API_HOST + "\n" + AMAZON_API_REQUEST_URI + "\n" + args
-    val hmacResult = hmac(toSign);
-    val sig = percentEncodeRfc3986(hmacResult);
+    val hmacResult = hmac(toSign)
+    val sig = percentEncodeRfc3986(hmacResult)
     AMAZON_API_REQUEST_URI + "?" + args + "&Signature=" + sig
   }
 
