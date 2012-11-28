@@ -1,6 +1,10 @@
-This is your new Play 2.0 application
-=====================================
+Play 2.0 Framework
+==================
 
-This file will be packaged with your application, when using `play dist`.
+To familiarise myself with Scala, Play & MongoDB I'm re-writing my photobook library
+(currently available at http://hurdy.org) that monitors the new and used prices of my
+photobooks using the Amazon API.
 
-This file was modified by IntelliJ IDEA 11.1.4 for binding GitHub repository
+This is a work in progress (and progress may be slow and job and two kids leaves little time!)
+
+Mike
