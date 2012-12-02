@@ -1,12 +1,21 @@
 package model
 
-class Price(
-             val amount: Int,
-             val currencyCode: String,
-             val formattedPrice: String
-             ) {
+sealed trait Price
 
-  override def toString(): String = {
+case class UnknownPrice() extends Price {
+
+  override def toString: String = {
+    "No price found"
+  }
+}
+
+case class KnownPrice(
+                       amount: Int,
+                       currencyCode: String,
+                       formattedPrice: String
+                       ) extends Price {
+
+  override def toString: String = {
     formattedPrice
   }
 

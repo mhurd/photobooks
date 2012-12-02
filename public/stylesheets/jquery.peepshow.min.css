@@ -1,0 +1,269 @@
+/*!* jQuery Peepshow * jquery.peepshow.css * Copyright 2011 ZULIUS LLC All rights reserved. */
+.jq-peepshow * {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-weight: inherit;
+    font-style: inherit;
+    font-size: 100%;
+    font-family: inherit;
+    vertical-align: baseline;
+}
+
+.jq-peepshow :focus, .jq-peepshow a {
+    outline: none;
+}
+
+.jq-peepshow ul {
+    list-style: none;
+}
+
+.jq-peepshow ul li {
+    position: relative;
+    left: 0;
+    top: 0;
+    float: left;
+    z-index: 0;
+    list-style-type: none;
+}
+
+.jq-peepshow ul li.first {
+    clear: both;
+}
+
+.jq-peepshow ul li.last {
+    margin-right: 0 !important;
+}
+
+.jq-peepshow ul li .image-wrap {
+    padding: 0;
+    left: 0;
+    top: 0;
+    position: absolute;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+}
+
+.jq-peepshow ul li .image-wrap img {
+    display: none;
+}
+
+.jq-peepshow ul li .image-wrap a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    outline: none;
+}
+
+.jq-peepshow ul li .image-wrap img {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.jq-peepshow ul li.expanded {
+    z-index: 9996;
+}
+
+.jq-peepshow ul li.expanded .image-wrap {
+    z-index: 9997;
+}
+
+.jq-peepshow ul li .image-wrap img.last-shown {
+    z-index: 9998;
+}
+
+.jq-peepshow ul li .image-wrap img.shown {
+    z-index: 9999;
+}
+
+.jq-peepshow ul li .image-wrap .overlay {
+    z-index: 10000;
+    position: relative;
+}
+
+.jq-peepshow ul li .image-wrap .overlay .span {
+    z-index: 10001;
+    position: absolute;
+}
+
+.jq-peepshow ul li .image-wrap .overlay .rotate-state-button {
+    z-index: 10002;
+    position: absolute;
+}
+
+.jq-peepshow:after, .jq-peepshow-auto-center:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.jq-peepshow-auto-center {
+    width: 100%;
+}
+
+.jq-peepshow-auto-center .jq-peepshow {
+    float: right;
+    position: relative;
+    left: -50%;
+    text-align: left;
+}
+
+.jq-peepshow-auto-center .jq-peepshow ul {
+    position: relative;
+    left: 50%;
+}
+
+.jq-peepshow.touch ul li.expanded .image-wrap {
+    border: none;
+    margin: 0 auto;
+    text-align: center;
+    display: block;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.jq-peepshow.touch ul li.expanded .image-wrap img {
+    vertical-align: middle;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.jq-peepshow ul li {
+    margin: 0 60px 60px 0;
+}
+
+.jq-peepshow .image-wrap {
+    border: 1px solid #727272;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-color: #000;
+}
+
+.jq-peepshow ul li.expanded .image-wrap {
+    -moz-box-shadow: 3px 3px 30px 3px #000;
+    -webkit-box-shadow: 3px 3px 30px 3px #000;
+    box-shadow: 3px 3px 30px 3px #000;
+}
+
+.jq-peepshow ul li .image-wrap .overlay {
+    opacity: .8;
+    filter: alpha(opacity = 70);
+    background-color: #141414;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+    color: #FFF;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 12px;
+}
+
+.jq-peepshow ul li .image-wrap .overlay.bottom {
+    bottom: 0;
+    text-align: left;
+}
+
+.jq-peepshow.touch ul li .image-wrap .overlay {
+    min-height: 25px;
+    line-height: 25px;
+    padding: 10px 0;
+    font-size: 1em;
+}
+
+.jq-peepshow.touch ul li .image-wrap .overlay.top {
+    top: 0;
+    text-align: left;
+}
+
+.jq-peepshow.touch ul li .image-wrap .overlay.top a.back, .jq-peepshow.touch ul li .image-wrap .overlay.top .count {
+    color: #FFF;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    width: 50%;
+    margin: 0;
+    padding: 0;
+}
+
+.jq-peepshow.touch ul li .image-wrap .overlay.top a.back {
+    text-decoration: none;
+    border-right: 1px solid #727272;
+    margin-right: -1px;
+    height: 100%;
+}
+
+.jq-peepshow.touch ul li .image-wrap .overlay.top .count {
+    text-align: center;
+    vertical-align: middle;
+    width: 50%;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+.jq-peepshow ul li .image-wrap .overlay span {
+    padding: 0 10px;
+}
+
+.jq-peepshow ul li .image-wrap .overlay .rotate-state-button {
+    cursor: pointer;
+    color: #FFF;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    right: 10px;
+    top: 50%;
+    margin-top: -12px;
+    height: 24px;
+    width: 24px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-image: url(../images/pause.png);
+    display: block;
+    vertical-align: middle;
+}
+
+.jq-peepshow ul li .image-wrap .overlay .rotate-state-button.paused {
+    background-image: url(../images/play.png);
+}
+
+.jq-peepshow.touch ul li .image-wrap .overlay .rotate-state-button {
+    margin-top: -22px;
+    padding: 10px;
+}
+
+.jq-peepshow .image-wrap.loading, .jq-peepshow ul li .image-wrap .overlay .rotate-state-button.loading {
+    background-image: url(../images/loader.gif);
+}
+
+.jq-peepshow ul li .image-wrap.round {
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+}
+
+.jq-peepshow ul li .image-wrap.round, .jq-peepshow ul li .image-wrap.round img {
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -khtml-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.jq-peepshow ul li .image-wrap img.error {
+    background-color: #000;
+}
+
+.jq-peepshow ul li .summary {
+    position: relative;
+    bottom: -104%;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    display: block;
+}

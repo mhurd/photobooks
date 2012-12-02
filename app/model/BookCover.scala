@@ -1,13 +1,23 @@
 package model
 
-import xml.Elem
+import xml.{NodeSeq, Elem}
 
-case class BookCover(
-                      size: String,
-                      url: String,
-                      height: Int, // pixels
-                      width: Int // pixels
-                      ) {
+sealed trait BookCover {
+  def size: String
+
+  def url: String
+
+  def height: String
+
+  def width: String
+}
+
+case class KnownBookCover(
+                           size: String,
+                           url: String,
+                           height: String, // pixels
+                           width: String // pixels
+                           ) extends BookCover {
 
   override def toString: String = {
     "HEIGHT: " + height + ", " +
@@ -17,47 +27,50 @@ case class BookCover(
 
 }
 
+case class UnknownBookCover() extends BookCover {
+
+  def size: String = "Unknown"
+
+  def url: String = "Unknown"
+
+  def height: String = "Unknown"
+
+  def width: String = "Unknown"
+
+  override def toString: String = {
+    "Unknown"
+  }
+
+}
+
 object BookCover {
+
+  private def bookCover(imageSetNode: NodeSeq, name: String): BookCover = {
+    val imageName = name + "Image"
+    val xml = imageSetNode \ imageName
+    xml.size match {
+      case 0 => UnknownBookCover()
+      case _ => {
+        val node = (imageSetNode \ imageName).head
+        KnownBookCover(
+          name,
+          node \ "URL" text,
+          node \ "Height" text,
+          node \ "Width" text
+        )
+      }
+    }
+  }
 
   def fromXml(xml: Elem): Map[String, BookCover] = {
     val imageSetNode = xml \ "Items" \ "Item" \ "ImageSets" \ "ImageSet"
     Map(
-      "Swatch" -> new BookCover(
-        "Swatch",
-        imageSetNode \ "SwatchImage" \ "URL" text,
-        (imageSetNode \ "SwatchImage" \ "Height" text) toInt,
-        (imageSetNode \ "SwatchImage" \ "Width" text) toInt
-      ),
-      "Small" -> new BookCover(
-        "Small",
-        imageSetNode \ "SmallImage" \ "URL" text,
-        (imageSetNode \ "SmallImage" \ "Height" text) toInt,
-        (imageSetNode \ "SmallImage" \ "Width" text) toInt
-      ),
-      "Thumbnail" -> new BookCover(
-        "Thumbnail",
-        imageSetNode \ "ThumbnailImage" \ "URL" text,
-        (imageSetNode \ "ThumbnailImage" \ "Height" text) toInt,
-        (imageSetNode \ "ThumbnailImage" \ "Width" text) toInt
-      ),
-      "Tiny" -> new BookCover(
-        "Tiny",
-        imageSetNode \ "TinyImage" \ "URL" text,
-        (imageSetNode \ "TinyImage" \ "Height" text) toInt,
-        (imageSetNode \ "TinyImage" \ "Width" text) toInt
-      ),
-      "Medium" -> new BookCover(
-        "Medium",
-        imageSetNode \ "MediumImage" \ "URL" text,
-        (imageSetNode \ "MediumImage" \ "Height" text) toInt,
-        (imageSetNode \ "MediumImage" \ "Width" text) toInt
-      ),
-      "Large" -> new BookCover(
-        "Large",
-        imageSetNode \ "LargeImage" \ "URL" text,
-        (imageSetNode \ "LargeImage" \ "Height" text) toInt,
-        (imageSetNode \ "LargeImage" \ "Width" text) toInt
-      )
+      "Swatch" -> bookCover(imageSetNode, "Swatch"),
+      "Small" -> bookCover(imageSetNode, "Small"),
+      "Thumbnail" -> bookCover(imageSetNode, "Thumbnail"),
+      "Tiny" -> bookCover(imageSetNode, "Tiny"),
+      "Medium" -> bookCover(imageSetNode, "Medium"),
+      "Large" -> bookCover(imageSetNode, "Large")
     )
   }
 }

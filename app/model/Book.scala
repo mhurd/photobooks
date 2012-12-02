@@ -7,7 +7,7 @@ class Book(
             val ean: String,
             val authors: String,
             val binding: String,
-            val numberOfPages: Int,
+            val numberOfPages: String,
             val publicationDate: String,
             val publisher: String,
             val title: String,
@@ -29,18 +29,28 @@ class Book(
       "COVERS: \n\t" + (bookCovers mkString ("\n\t"))
   }
 
+  def thumbnailCover(): BookCover = bookCovers("Thumbnail")
+
+  def mediumCover(): BookCover = bookCovers("Medium")
+
+  def largeCover(): BookCover = bookCovers("Large")
+
 }
 
 object Book {
 
   def fromXml(xml: Elem): Book = {
     val itemAttributesNode = xml \ "Items" \ "Item" \ "ItemAttributes"
+    val pages = (itemAttributesNode \ "NumberOfPages").text match {
+      case "" => "Unknown"
+      case _ => (itemAttributesNode \ "NumberOfPages").text
+    }
     new Book(
       itemAttributesNode \ "ISBN" text,
       itemAttributesNode \ "EAN" text,
       itemAttributesNode \ "Author" map (f => f.text) mkString (", "),
       itemAttributesNode \ "Binding" text,
-      (itemAttributesNode \ "NumberOfPages" text) toInt,
+      pages,
       itemAttributesNode \ "PublicationDate" text,
       itemAttributesNode \ "Publisher" text,
       itemAttributesNode \ "Title" text,
