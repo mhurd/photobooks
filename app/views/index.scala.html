@@ -5,40 +5,34 @@
 <head>
     <meta charset=utf-8/>
     <title>Photobooks</title>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at(" stylesheets
-    /jquery.peepshow.css")" />
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at(" images
-    /favicon.png")" />
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")" />
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/jquery.peepshow.css")" />
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at(" images/favicon.png")" />
+    <link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
     <!--[if lt IE 8]>
-    <link rel="stylesheet" type="text/css" href="@routes.Assets.at(" stylesheets/jquery.peepshow.ie7.css")" />
+    <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/jquery.peepshow.ie7.css")" />
     <![endif]-->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
-    <script src="@routes.Assets.at(" javascripts
-    /jquery.peepshow.min.js")" type="text/javascript"></script>
-    <
-    script
+    <script src="@routes.Assets.at("javascripts/jquery.peepshow.min.js")" type="text/javascript"></script>
+    <script
     type = "text/javascript" >
             $(document).ready(function () {
                 $("#tiles").peepshow({
                     crop:[190, 190],
                     itemsPerRow:4,
-                    imageNotFound:"@routes.Assets.at("images / image - not - found.jpg
-                ")",
-                        rotateSpeed
-                :
-                60000,
-                        showLoader
-                :
-                true,
-                        autoMarginRatio
-                :
-                0.2
+                    imageNotFound:"@routes.Assets.at("images/image-not-found.jpg")",
+                    rotateSpeed: 60000,
+                    showLoader: true,
+                    autoMarginRatio: 0.2
             });
     })
     ;
     </script>
 </head>
 <body>
+<div id="banner">
+    <h1>Fleetingphotons Photobook Library</h1>
+</div>
 <div id="page">
     <div id="tiles">
         <ul>

@@ -5,6 +5,9 @@ import amazon.AmazonClient
 import xml.{PrettyPrinter, Elem}
 import model.Book
 import play.api.Play
+import play.api.libs.concurrent.{Promise, Akka}
+import play.api.Play.current
+import java.util.concurrent.TimeUnit
 
 object Application extends Controller {
 
@@ -173,9 +176,16 @@ object Application extends Controller {
       "9078909072",
       "9899714909")
 
-  lazy val books = isbns map (b => makeBook(b))
+  lazy val books = Promise.sequence(isbns map (b => makeBookAsync(b)))
+
+  def makeBookAsync(isbn: String): Promise[Book] = {
+    Akka.future[Book] {
+      makeBook(isbn)
+    }
+  }
 
   def makeBook(isbn: String): Book = {
+    println("making book: " + isbn)
     val xml = client.findByIsbn(isbn)
     try {
       prettyPrintXml(xml)
@@ -194,7 +204,7 @@ object Application extends Controller {
   }
 
   def index = Action {
-    Ok(views.html.index(books))
+    Ok(views.html.index(books.await(30, TimeUnit.SECONDS).get))
   }
 
 }

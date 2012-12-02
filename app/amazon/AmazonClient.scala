@@ -37,6 +37,7 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
   private val DEFAULT_TIMEOUT = Duration.fromTimeUnit(10, TimeUnit.SECONDS)
   private val HOST_CONNECTION_LIMIT = 1
   private val DEFAULT_HTTP_PORT = 80
+  private val MAX_RETRYS = 3
 
   // Base arguments for the Amazon API request
   private val BASIC_ARGUMENTS = SortedMap(
@@ -88,23 +89,28 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
     AMAZON_API_REQUEST_URI + "?" + args + "&Signature=" + sig
   }
 
-  private def find(arguments: SortedMap[String, String], timeout: Duration): Elem = {
+  private def find(arguments: SortedMap[String, String], timeout: Duration, retryCount: Int): Elem = {
     val request: HttpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, getSignedUrl(arguments))
     request.addHeader("Host", AMAZON_API_HOST)
     val responseFuture: Future[HttpResponse] = httpClient(request)
     responseFuture.apply(timeout)
     responseFuture.get().getStatus match {
       case HttpResponseStatus.OK => scala.xml.XML.loadString(responseFuture.get().getContent.toString(Charset.forName(UTF8_CHARSET)))
-      case _ => throw new Exception(responseFuture.get().getStatus.getReasonPhrase)
+      case _ => {
+        if (retryCount < MAX_RETRYS)
+          find(arguments, timeout, retryCount+1)
+        else
+          throw new RuntimeException(responseFuture.get().getContent.toString(Charset.forName(UTF8_CHARSET)))
+      }
     }
   }
 
   def findByKeywords(keywords: List[String]): Elem = {
-    find(SortedMap("Operation" -> "ItemSearch", "Keywords" -> keywords.mkString("+")), DEFAULT_TIMEOUT)
+    find(SortedMap("Operation" -> "ItemSearch", "Keywords" -> keywords.mkString("+")), DEFAULT_TIMEOUT, 0)
   }
 
   def findByIsbn(isbn: String): Elem = {
-    find(SortedMap("Operation" -> "ItemLookup", "ItemId" -> isbn, "IdType" -> "ISBN"), DEFAULT_TIMEOUT)
+    find(SortedMap("Operation" -> "ItemLookup", "ItemId" -> isbn, "IdType" -> "ISBN"), DEFAULT_TIMEOUT, 0)
   }
 
 }

@@ -1,0 +1,7 @@
+#banner { height: 120px; }
+
+#banner h1 {
+    letter-spacing: -2px;
+    font-family: 'Poiret One', cursive;
+    font-size: 64px;
+    text-align: center;}
