@@ -4,7 +4,7 @@ import org.jboss.netty.handler.codec.http._
 import com.twitter.finagle.Service
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.Http
-import com.twitter.util.{Duration, Future}
+import com.twitter.util.{TimeoutException, Duration, Future}
 import scala.collection.immutable.SortedMap
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit
 import java.net.{InetSocketAddress, URLEncoder}
 import xml.Elem
 import scala.Predef._
+import scala.RuntimeException
 
 case class AmazonClient(private val accessKey: String, private val secretKey: String, private val associateTag: String) {
 
@@ -33,11 +34,11 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
   mac.init(secretKeySpec)
 
   // HTTP client constants
-  private val DEFAULT_TCP_TIMEOUT = Duration.fromTimeUnit(30, TimeUnit.SECONDS)
-  private val DEFAULT_TIMEOUT = Duration.fromTimeUnit(30, TimeUnit.SECONDS)
+  private val DEFAULT_TCP_TIMEOUT = Duration.fromTimeUnit(10, TimeUnit.SECONDS)
+  private val DEFAULT_TIMEOUT = Duration.fromTimeUnit(10, TimeUnit.SECONDS)
   private val HOST_CONNECTION_LIMIT = 1
   private val DEFAULT_HTTP_PORT = 80
-  private val MAX_RETRYS = 5
+  private val MAX_RETRYS = 3
 
   // Base arguments for the Amazon API request
   private val BASIC_ARGUMENTS = SortedMap(
@@ -56,6 +57,7 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
     .hosts(new InetSocketAddress(AMAZON_API_HOST, DEFAULT_HTTP_PORT))
     .hostConnectionLimit(HOST_CONNECTION_LIMIT)
     .tcpConnectTimeout(DEFAULT_TCP_TIMEOUT)
+    .retries(3)
     .build()
 
   private def getIso8601TimestampString: String = {
@@ -90,18 +92,26 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
   }
 
   private def find(arguments: SortedMap[String, String], timeout: Duration, retryCount: Int): Elem = {
-    val request: HttpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, getSignedUrl(arguments))
-    request.addHeader("Host", AMAZON_API_HOST)
-    val responseFuture: Future[HttpResponse] = httpClient(request)
-    responseFuture.apply(timeout)
-    responseFuture.get().getStatus match {
-      case HttpResponseStatus.OK => scala.xml.XML.loadString(responseFuture.get().getContent.toString(Charset.forName(UTF8_CHARSET)))
-      case _ => {
-        if (retryCount < MAX_RETRYS)
-          find(arguments, timeout, retryCount+1)
-        else
-          throw new RuntimeException(responseFuture.get().getContent.toString(Charset.forName(UTF8_CHARSET)))
+    try {
+      val request: HttpRequest = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, getSignedUrl(arguments))
+      request.addHeader("Host", AMAZON_API_HOST)
+      val responseFuture: Future[HttpResponse] = httpClient(request)
+      val httpResponse = responseFuture.apply(timeout)
+      httpResponse.getStatus match {
+        case HttpResponseStatus.OK => scala.xml.XML.loadString(httpResponse.getContent.toString(Charset.forName(UTF8_CHARSET)))
+        case _ => {
+          if (retryCount < MAX_RETRYS)
+            find(arguments, timeout, retryCount+1)
+          else
+            throw new RuntimeException(httpResponse.getContent.toString(Charset.forName(UTF8_CHARSET)))
+        }
       }
+    } catch {
+      case te: TimeoutException => if (retryCount < MAX_RETRYS)
+                find(arguments, timeout, retryCount+1)
+              else
+                throw new RuntimeException(te)
+      case e: Exception => throw e
     }
   }
 

@@ -185,7 +185,7 @@ object Application extends Controller {
   }
 
   def makeBook(isbn: String): Book = {
-    println("making book: " + isbn)
+    println(Thread.currentThread().getName + " - making book: " + isbn)
     val xml = client.findByIsbn(isbn)
     try {
       prettyPrintXml(xml)
@@ -204,7 +204,9 @@ object Application extends Controller {
   }
 
   def index = Action {
-    Ok(views.html.index(books.await(30, TimeUnit.SECONDS).get))
+    Async {
+      books map (res => Ok(views.html.index(res)))
+    }
   }
 
 }
