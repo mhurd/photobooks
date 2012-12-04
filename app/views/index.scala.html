@@ -36,7 +36,7 @@
         <ul>
             @for(book <- books) {
             <li>
-                <a href="@book.largeCover.url">
+                <a href="/books/@book.isbn">
                     <img src="@book.mediumCover.url" thumb="1"/>
                     <img src="@book.largeCover.url" caption="@book.title" alt="@book.title"/>
                 </a>

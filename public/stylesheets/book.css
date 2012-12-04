@@ -1,0 +1,19 @@
+#banner { height: 120px; }
+
+#banner h1, h2 {
+    letter-spacing: -2px;
+    font-family: 'Poiret One', cursive;
+    font-size: 36px;
+    text-align: center;}
+
+#body {
+  width: 800px ;
+  margin-left: auto ;
+  margin-right: auto ;
+}
+
+#book {
+  width: 400px ;
+  margin-left: auto ;
+  margin-right: auto ;
+}

@@ -1,6 +1,6 @@
 #banner { height: 120px; }
 
-#banner h1 {
+#banner h1, h2 {
     letter-spacing: -2px;
     font-family: 'Poiret One', cursive;
     font-size: 64px;

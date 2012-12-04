@@ -209,4 +209,10 @@ object Application extends Controller {
     }
   }
 
+  def book(isbn: String) = Action {
+    Async {
+      makeBookAsync(isbn) map (res => Ok(views.html.book(res)))
+    }
+  }
+
 }
