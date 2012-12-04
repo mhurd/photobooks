@@ -45,32 +45,34 @@ case class UnknownBookCover() extends BookCover {
 
 object BookCover {
 
-  private def bookCover(imageSetNode: NodeSeq, name: String): BookCover = {
+  private def bookCovers(imageSetNode: NodeSeq, name: String): List[BookCover] = {
     val imageName = name + "Image"
     val xml = imageSetNode \ imageName
     xml.size match {
-      case 0 => UnknownBookCover()
+      case 0 => List(UnknownBookCover())
       case _ => {
-        val node = (imageSetNode \ imageName).head
-        KnownBookCover(
-          name,
-          node \ "URL" text,
-          node \ "Height" text,
-          node \ "Width" text
-        )
+        val nodes = (imageSetNode \ imageName)
+        (nodes map (node =>
+          KnownBookCover(
+            name,
+            node \ "URL" text,
+            node \ "Height" text,
+            node \ "Width" text
+          )
+        )).toList
       }
     }
   }
 
-  def fromXml(xml: Elem): Map[String, BookCover] = {
+  def fromXml(xml: Elem): Map[String, List[BookCover]] = {
     val imageSetNode = xml \ "Items" \ "Item" \ "ImageSets" \ "ImageSet"
     Map(
-      "Swatch" -> bookCover(imageSetNode, "Swatch"),
-      "Small" -> bookCover(imageSetNode, "Small"),
-      "Thumbnail" -> bookCover(imageSetNode, "Thumbnail"),
-      "Tiny" -> bookCover(imageSetNode, "Tiny"),
-      "Medium" -> bookCover(imageSetNode, "Medium"),
-      "Large" -> bookCover(imageSetNode, "Large")
+      "Swatch" -> bookCovers(imageSetNode, "Swatch"),
+      "Small" -> bookCovers(imageSetNode, "Small"),
+      "Thumbnail" -> bookCovers(imageSetNode, "Thumbnail"),
+      "Tiny" -> bookCovers(imageSetNode, "Tiny"),
+      "Medium" -> bookCovers(imageSetNode, "Medium"),
+      "Large" -> bookCovers(imageSetNode, "Large")
     )
   }
 }

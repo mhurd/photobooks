@@ -12,7 +12,7 @@ class Book(
             val publisher: String,
             val title: String,
             val dimension: BookDimension,
-            val bookCovers: Map[String, BookCover],
+            val bookCovers: Map[String, List[BookCover]],
             val offerSummary: OfferSummary) {
 
   override def toString: String = {
@@ -29,11 +29,11 @@ class Book(
       "COVERS: \n\t" + (bookCovers mkString ("\n\t"))
   }
 
-  def thumbnailCover(): BookCover = bookCovers("Thumbnail")
+  def thumbnailCovers(): List[BookCover] = bookCovers("Thumbnail")
 
-  def mediumCover(): BookCover = bookCovers("Medium")
+  def mediumCovers(): List[BookCover] = bookCovers("Medium")
 
-  def largeCover(): BookCover = bookCovers("Large")
+  def largeCovers(): List[BookCover] = bookCovers("Large")
 
 }
 
