@@ -2,12 +2,14 @@ package model
 
 import xml.{NodeSeq, Elem}
 
-case class OfferSummary(
-                         lowestUsedPrice: Price,
-                         lowestNewPrice: Price,
-                         totalUsed: String,
-                         totalNew: String
-                         ) {
+sealed trait OfferSummary {
+  def lowestUsedPrice: Price
+
+  def lowestNewPrice: Price
+
+  def totalUsed: String
+
+  def totalNew: String
 
   override def toString: String = {
     "LOWEST USED PRICE: " + lowestUsedPrice + ", " +
@@ -16,6 +18,24 @@ case class OfferSummary(
       "TOTAL NEW: " + totalNew
   }
 
+}
+
+case class KnownOfferSummary(
+                              lowestUsedPrice: Price,
+                              lowestNewPrice: Price,
+                              totalUsed: String,
+                              totalNew: String
+                              ) extends OfferSummary {
+}
+
+case class UnknownOfferSummary() extends OfferSummary {
+  def lowestUsedPrice: Price = UnknownPrice()
+
+  def lowestNewPrice: Price = UnknownPrice()
+
+  def totalUsed: String = "Unknown"
+
+  def totalNew: String = "Unknown"
 }
 
 object OfferSummary {
@@ -50,7 +70,7 @@ object OfferSummary {
     val offerSummaryNode = xml \ "Items" \ "Item" \ "OfferSummary"
     val totalUsed = (offerSummaryNode \ "TotalUsed").text
     val totalNew = (offerSummaryNode \ "TotalNew").text
-    OfferSummary(
+    KnownOfferSummary(
       lowestUsedPrice(offerSummaryNode, totalUsed),
       lowestNewPrice(offerSummaryNode, totalNew),
       totalUsed,

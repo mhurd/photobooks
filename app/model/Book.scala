@@ -2,18 +2,29 @@ package model
 
 import xml.Elem
 
-class Book(
-            val isbn: String,
-            val ean: String,
-            val authors: String,
-            val binding: String,
-            val numberOfPages: String,
-            val publicationDate: String,
-            val publisher: String,
-            val title: String,
-            val dimension: BookDimension,
-            val bookCovers: Map[String, List[BookCover]],
-            val offerSummary: OfferSummary) {
+sealed trait Book {
+
+  def isbn: String
+
+  def ean: String
+
+  def authors: String
+
+  def binding: String
+
+  def numberOfPages: String
+
+  def publicationDate: String
+
+  def publisher: String
+
+  def title: String
+
+  def dimension: BookDimension
+
+  def bookCovers: Map[String, List[BookCover]]
+
+  def offerSummary: OfferSummary
 
   override def toString: String = {
     "TITLE: " + title + "\n" +
@@ -29,35 +40,85 @@ class Book(
       "COVERS: \n\t" + (bookCovers mkString ("\n\t"))
   }
 
-  def thumbnailCovers(): List[BookCover] = bookCovers("Thumbnail")
+  def valid: Boolean
 
-  def mediumCovers(): List[BookCover] = bookCovers("Medium")
+  def thumbnailCovers: List[BookCover] = bookCovers("Thumbnail")
 
-  def largeCovers(): List[BookCover] = bookCovers("Large")
+  def mediumCovers: List[BookCover] = bookCovers("Medium")
+
+  def largeCovers: List[BookCover] = bookCovers("Large")
+
+}
+
+case class KnownBook(isbn: String,
+                     ean: String,
+                     authors: String,
+                     binding: String,
+                     numberOfPages: String,
+                     publicationDate: String,
+                     publisher: String,
+                     title: String,
+                     dimension: BookDimension,
+                     bookCovers: Map[String, List[BookCover]],
+                     offerSummary: OfferSummary) extends Book {
+  def valid: Boolean = true
+}
+
+case class UnknownBook(isbn: String) extends Book {
+
+  def ean: String = "Unknown"
+
+  def authors: String = "Unknown"
+
+  def binding: String = "Unknown"
+
+  def numberOfPages: String = "Unknown"
+
+  def publicationDate: String = "Unknown"
+
+  def publisher: String = "Unknown"
+
+  def title: String = "Unknown"
+
+  def dimension: BookDimension = UnknownBookDimension()
+
+  def bookCovers: Map[String, List[BookCover]] = Map()
+
+  def offerSummary: OfferSummary = UnknownOfferSummary()
+
+  def valid: Boolean = false
 
 }
 
 object Book {
 
-  def fromXml(xml: Elem): Book = {
-    val itemAttributesNode = xml \ "Items" \ "Item" \ "ItemAttributes"
-    val pages = (itemAttributesNode \ "NumberOfPages").text match {
-      case "" => "Unknown"
-      case _ => (itemAttributesNode \ "NumberOfPages").text
+  def fromXml(isbn: String, xml: Elem): Book = {
+    (xml \\ "Error").size match {
+      case 0 => {
+        val itemAttributesNode = xml \ "Items" \ "Item" \ "ItemAttributes"
+        val pages = (itemAttributesNode \ "NumberOfPages").text match {
+          case "" => "Unknown"
+          case _ => (itemAttributesNode \ "NumberOfPages").text
+        }
+        new KnownBook(
+          itemAttributesNode \ "ISBN" text,
+          itemAttributesNode \ "EAN" text,
+          itemAttributesNode \ "Author" map (f => f.text) mkString (", "),
+          itemAttributesNode \ "Binding" text,
+          pages,
+          itemAttributesNode \ "PublicationDate" text,
+          itemAttributesNode \ "Publisher" text,
+          itemAttributesNode \ "Title" text,
+          BookDimension.fromXml(xml),
+          BookCover.fromXml(xml),
+          OfferSummary.fromXml(xml)
+        )
+      }
+      case _ => {
+        println("Could not find book: " + isbn)
+        UnknownBook(isbn)
+      }
     }
-    new Book(
-      itemAttributesNode \ "ISBN" text,
-      itemAttributesNode \ "EAN" text,
-      itemAttributesNode \ "Author" map (f => f.text) mkString (", "),
-      itemAttributesNode \ "Binding" text,
-      pages,
-      itemAttributesNode \ "PublicationDate" text,
-      itemAttributesNode \ "Publisher" text,
-      itemAttributesNode \ "Title" text,
-      BookDimension.fromXml(xml),
-      BookCover.fromXml(xml),
-      OfferSummary.fromXml(xml)
-    )
   }
 
 }

@@ -59,7 +59,7 @@ object BookCover {
             node \ "Height" text,
             node \ "Width" text
           )
-        )).toList
+          )).toList
       }
     }
   }

@@ -188,11 +188,9 @@ object Application extends Controller {
     println(Thread.currentThread().getName + " - making book: " + isbn)
     val xml = client.findByIsbn(isbn)
     try {
-      prettyPrintXml(xml)
-      Book.fromXml(xml)
+      Book.fromXml(isbn, xml)
     } catch {
       case nfe: NumberFormatException => {
-        prettyPrintXml(xml)
         throw nfe
       }
     }
@@ -205,7 +203,7 @@ object Application extends Controller {
 
   def index = Action {
     Async {
-      books map (res => Ok(views.html.index(res)))
+      books map (res => Ok(views.html.index(res.filter(book => book.valid))))
     }
   }
 

@@ -101,16 +101,16 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
         case HttpResponseStatus.OK => scala.xml.XML.loadString(httpResponse.getContent.toString(Charset.forName(UTF8_CHARSET)))
         case _ => {
           if (retryCount < MAX_RETRYS)
-            find(arguments, timeout, retryCount+1)
+            find(arguments, timeout, retryCount + 1)
           else
             throw new RuntimeException(httpResponse.getContent.toString(Charset.forName(UTF8_CHARSET)))
         }
       }
     } catch {
       case te: TimeoutException => if (retryCount < MAX_RETRYS)
-                find(arguments, timeout, retryCount+1)
-              else
-                throw new RuntimeException(te)
+        find(arguments, timeout, retryCount + 1)
+      else
+        throw new RuntimeException(te)
       case e: Exception => throw e
     }
   }
