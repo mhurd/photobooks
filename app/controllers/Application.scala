@@ -187,6 +187,7 @@ object Application extends Controller {
   def makeBook(isbn: String): Book = {
     println(Thread.currentThread().getName + " - making book: " + isbn)
     val xml = client.findByIsbn(isbn)
+    //println(prettyPrintXml(xml))
     try {
       Book.fromXml(isbn, xml)
     } catch {

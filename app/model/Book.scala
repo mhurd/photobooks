@@ -20,9 +20,9 @@ sealed trait Book {
 
   def title: String
 
-  def dimension: BookDimension
-
   def bookCovers: Map[String, List[BookCover]]
+
+  def listPrice: Price
 
   def offerSummary: OfferSummary
 
@@ -35,7 +35,7 @@ sealed trait Book {
       "PUBLICATION DATE: " + publicationDate + "\n" +
       "BINDING: " + binding + "\n" +
       "PAGES: " + numberOfPages + "\n" +
-      "DIMENSION: \n\t" + dimension + "\n" +
+      "LIST PRICE: " + listPrice + "\n" +
       "OFFER SUMMARY: \n\t" + offerSummary + "\n" +
       "COVERS: \n\t" + (bookCovers mkString ("\n\t"))
   }
@@ -58,8 +58,8 @@ case class KnownBook(isbn: String,
                      publicationDate: String,
                      publisher: String,
                      title: String,
-                     dimension: BookDimension,
                      bookCovers: Map[String, List[BookCover]],
+                     listPrice: Price,
                      offerSummary: OfferSummary) extends Book {
   def valid: Boolean = true
 }
@@ -80,9 +80,9 @@ case class UnknownBook(isbn: String) extends Book {
 
   def title: String = "Unknown"
 
-  def dimension: BookDimension = UnknownBookDimension()
-
   def bookCovers: Map[String, List[BookCover]] = Map()
+
+  def listPrice: Price = UnknownPrice()
 
   def offerSummary: OfferSummary = UnknownOfferSummary()
 
@@ -109,8 +109,8 @@ object Book {
           itemAttributesNode \ "PublicationDate" text,
           itemAttributesNode \ "Publisher" text,
           itemAttributesNode \ "Title" text,
-          BookDimension.fromXml(xml),
           BookCover.fromXml(xml),
+          Price.fromXml(itemAttributesNode \ "ListPrice"),
           OfferSummary.fromXml(xml)
         )
       }
