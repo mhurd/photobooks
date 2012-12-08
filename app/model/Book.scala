@@ -2,7 +2,7 @@ package model
 
 import xml.Elem
 
-sealed trait Book {
+sealed trait Book extends Ordered[Book] {
 
   def isbn: String
 
@@ -44,9 +44,15 @@ sealed trait Book {
 
   def thumbnailCovers: List[BookCover] = bookCovers("Thumbnail")
 
+  def tinyCovers: List[BookCover] = bookCovers("Tiny")
+
   def mediumCovers: List[BookCover] = bookCovers("Medium")
 
+  def mediumLargeCovers: List[BookCover] = bookCovers("MediumLarge")
+
   def largeCovers: List[BookCover] = bookCovers("Large")
+
+  def compare(other: Book) = title compare other.title
 
 }
 

@@ -64,6 +64,25 @@ object BookCover {
     }
   }
 
+  private def bookCovers(imageSetNode: NodeSeq, name: String, newSize: Int): List[BookCover] = {
+      val imageName = name + "Image"
+      val xml = imageSetNode \ imageName
+      xml.size match {
+        case 0 => List(UnknownBookCover())
+        case _ => {
+          val nodes = (imageSetNode \ imageName)
+          (nodes map (node =>
+            KnownBookCover(
+              name,
+              ((node \ "URL").text).replaceAll("_SL[0-9]{3}_", "_SL250_"),
+              node \ "Height" text,
+              node \ "Width" text
+            )
+            )).toList
+        }
+      }
+    }
+
   def fromXml(xml: Elem): Map[String, List[BookCover]] = {
     val imageSetNode = xml \ "Items" \ "Item" \ "ImageSets" \ "ImageSet"
     Map(
@@ -72,6 +91,7 @@ object BookCover {
       "Thumbnail" -> bookCovers(imageSetNode, "Thumbnail"),
       "Tiny" -> bookCovers(imageSetNode, "Tiny"),
       "Medium" -> bookCovers(imageSetNode, "Medium"),
+      "MediumLarge" -> bookCovers(imageSetNode, "Medium", 300),
       "Large" -> bookCovers(imageSetNode, "Large")
     )
   }
