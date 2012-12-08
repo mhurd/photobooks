@@ -20,7 +20,7 @@
                     crop:[140, 140],
                     itemsPerRow:6,
                     imageNotFound:"@routes.Assets.at("images/image-not-found.jpg")",
-                    rotateSpeed: 10000,
+                    rotateSpeed: 1000000,
                     showLoader: true,
                     autoMarginRatio: 0.1
             });
@@ -37,10 +37,8 @@
             @for(book <- books) {
             <li>
                 <a href="/books/@book.isbn">
-                    <img src="@book.tinyCovers.head.url" thumb="1"/>
-                    @for(bookCover <- book.mediumLargeCovers) {
-                        <img src="@bookCover.url" caption="@book.title" alt="@book.title"/>
-                    }
+                    <img src="@book.bookCover(115)" thumb="1"/>
+                    <img src="@book.bookCover(270)" caption="@book.title" alt="@book.title"/>
                 </a>
             </li>
             }

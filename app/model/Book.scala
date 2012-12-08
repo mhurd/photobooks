@@ -20,7 +20,7 @@ sealed trait Book extends Ordered[Book] {
 
   def title: String
 
-  def bookCovers: Map[String, List[BookCover]]
+  def bookCover: BookCover
 
   def listPrice: Price
 
@@ -37,20 +37,12 @@ sealed trait Book extends Ordered[Book] {
       "PAGES: " + numberOfPages + "\n" +
       "LIST PRICE: " + listPrice + "\n" +
       "OFFER SUMMARY: \n\t" + offerSummary + "\n" +
-      "COVERS: \n\t" + (bookCovers mkString ("\n\t"))
+      "COVER: \n\t" + bookCover + "\n"
   }
 
   def valid: Boolean
 
-  def thumbnailCovers: List[BookCover] = bookCovers("Thumbnail")
-
-  def tinyCovers: List[BookCover] = bookCovers("Tiny")
-
-  def mediumCovers: List[BookCover] = bookCovers("Medium")
-
-  def mediumLargeCovers: List[BookCover] = bookCovers("MediumLarge")
-
-  def largeCovers: List[BookCover] = bookCovers("Large")
+  def bookCover(size: Int): BookCover
 
   def compare(other: Book) = title compare other.title
 
@@ -64,10 +56,13 @@ case class KnownBook(isbn: String,
                      publicationDate: String,
                      publisher: String,
                      title: String,
-                     bookCovers: Map[String, List[BookCover]],
+                     bookCover: BookCover,
                      listPrice: Price,
                      offerSummary: OfferSummary) extends Book {
   def valid: Boolean = true
+  def bookCover(size: Int): BookCover = {
+    bookCover.size(size)
+    }
 }
 
 case class UnknownBook(isbn: String) extends Book {
@@ -86,13 +81,15 @@ case class UnknownBook(isbn: String) extends Book {
 
   def title: String = "Unknown"
 
-  def bookCovers: Map[String, List[BookCover]] = Map()
+  def bookCover: BookCover = UnknownBookCover()
 
   def listPrice: Price = UnknownPrice()
 
   def offerSummary: OfferSummary = UnknownOfferSummary()
 
   def valid: Boolean = false
+
+  def bookCover(size: Int): BookCover = UnknownBookCover()
 
 }
 

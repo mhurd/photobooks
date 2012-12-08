@@ -3,96 +3,47 @@ package model
 import xml.{NodeSeq, Elem}
 
 sealed trait BookCover {
-  def size: String
-
   def url: String
 
-  def height: String
-
-  def width: String
+  def size(size: Int): BookCover
 }
 
-case class KnownBookCover(
-                           size: String,
-                           url: String,
-                           height: String, // pixels
-                           width: String // pixels
-                           ) extends BookCover {
+case class KnownBookCover(url: String) extends BookCover {
 
   override def toString: String = {
-    "HEIGHT: " + height + ", " +
-      "WIDTH: " + width + ", " +
-      "URL: " + url
+    url
+  }
+
+  def size(size: Int): BookCover = {
+    KnownBookCover(url.replaceAll(".jpg", "._SL" + size + "_.jpg"))
   }
 
 }
 
 case class UnknownBookCover() extends BookCover {
 
-  def size: String = "Unknown"
-
   def url: String = "Unknown"
-
-  def height: String = "Unknown"
-
-  def width: String = "Unknown"
 
   override def toString: String = {
     "Unknown"
   }
 
+  def size(size: Int): BookCover = this
+
 }
 
 object BookCover {
 
-  private def bookCovers(imageSetNode: NodeSeq, name: String): List[BookCover] = {
-    val imageName = name + "Image"
-    val xml = imageSetNode \ imageName
-    xml.size match {
-      case 0 => List(UnknownBookCover())
-      case _ => {
-        val nodes = (imageSetNode \ imageName)
-        (nodes map (node =>
-          KnownBookCover(
-            name,
-            node \ "URL" text,
-            node \ "Height" text,
-            node \ "Width" text
-          )
-          )).toList
-      }
+  private def bookCovers(largeImageNode: NodeSeq): BookCover = {
+    largeImageNode.size match {
+      case 0 => UnknownBookCover()
+      case _ => KnownBookCover(largeImageNode \ "URL" text)
     }
   }
 
-  private def bookCovers(imageSetNode: NodeSeq, name: String, newSize: Int): List[BookCover] = {
-      val imageName = name + "Image"
-      val xml = imageSetNode \ imageName
-      xml.size match {
-        case 0 => List(UnknownBookCover())
-        case _ => {
-          val nodes = (imageSetNode \ imageName)
-          (nodes map (node =>
-            KnownBookCover(
-              name,
-              ((node \ "URL").text).replaceAll("_SL[0-9]{3}_", "_SL250_"),
-              node \ "Height" text,
-              node \ "Width" text
-            )
-            )).toList
-        }
-      }
-    }
-
-  def fromXml(xml: Elem): Map[String, List[BookCover]] = {
-    val imageSetNode = xml \ "Items" \ "Item" \ "ImageSets" \ "ImageSet"
-    Map(
-      "Swatch" -> bookCovers(imageSetNode, "Swatch"),
-      "Small" -> bookCovers(imageSetNode, "Small"),
-      "Thumbnail" -> bookCovers(imageSetNode, "Thumbnail"),
-      "Tiny" -> bookCovers(imageSetNode, "Tiny"),
-      "Medium" -> bookCovers(imageSetNode, "Medium"),
-      "MediumLarge" -> bookCovers(imageSetNode, "Medium", 300),
-      "Large" -> bookCovers(imageSetNode, "Large")
-    )
+  def fromXml(xml: Elem): BookCover = {
+    val largeImageNode = xml \ "Items" \ "Item" \ "LargeImage"
+    bookCovers(largeImageNode)
   }
+
 }

@@ -34,8 +34,8 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
   mac.init(secretKeySpec)
 
   // HTTP client constants
-  private val DEFAULT_TCP_TIMEOUT = Duration.fromTimeUnit(10, TimeUnit.SECONDS)
-  private val DEFAULT_TIMEOUT = Duration.fromTimeUnit(10, TimeUnit.SECONDS)
+  private val DEFAULT_TCP_TIMEOUT = Duration.fromTimeUnit(20, TimeUnit.SECONDS)
+  private val DEFAULT_TIMEOUT = Duration.fromTimeUnit(20, TimeUnit.SECONDS)
   private val HOST_CONNECTION_LIMIT = 1
   private val DEFAULT_HTTP_PORT = 80
   private val MAX_RETRYS = 3
