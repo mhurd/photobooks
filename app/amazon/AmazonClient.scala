@@ -16,7 +16,7 @@ import xml.Elem
 import scala.Predef._
 import scala.RuntimeException
 
-case class AmazonClient(private val accessKey: String, private val secretKey: String, private val associateTag: String) {
+class AmazonClient(private val accessKey: String, private val secretKey: String, private val associateTag: String) {
 
   // Amazon API Constants
   private val AMAZON_API_VERSION = "2011-08-01"
@@ -34,11 +34,11 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
   mac.init(secretKeySpec)
 
   // HTTP client constants
-  private val DEFAULT_TCP_TIMEOUT = Duration.fromTimeUnit(20, TimeUnit.SECONDS)
-  private val DEFAULT_TIMEOUT = Duration.fromTimeUnit(20, TimeUnit.SECONDS)
+  private val DEFAULT_TCP_TIMEOUT = Duration.fromTimeUnit(60, TimeUnit.SECONDS)
+  private val DEFAULT_TIMEOUT = Duration.fromTimeUnit(60, TimeUnit.SECONDS)
   private val HOST_CONNECTION_LIMIT = 1
   private val DEFAULT_HTTP_PORT = 80
-  private val MAX_RETRYS = 3
+  private val MAX_RETRIES = 3
 
   // Base arguments for the Amazon API request
   private val BASIC_ARGUMENTS = SortedMap(
@@ -100,14 +100,14 @@ case class AmazonClient(private val accessKey: String, private val secretKey: St
       httpResponse.getStatus match {
         case HttpResponseStatus.OK => scala.xml.XML.loadString(httpResponse.getContent.toString(Charset.forName(UTF8_CHARSET)))
         case _ => {
-          if (retryCount < MAX_RETRYS)
+          if (retryCount < MAX_RETRIES)
             find(arguments, timeout, retryCount + 1)
           else
             throw new RuntimeException(httpResponse.getContent.toString(Charset.forName(UTF8_CHARSET)))
         }
       }
     } catch {
-      case te: TimeoutException => if (retryCount < MAX_RETRYS)
+      case te: TimeoutException => if (retryCount < MAX_RETRIES)
         find(arguments, timeout, retryCount + 1)
       else
         throw new RuntimeException(te)

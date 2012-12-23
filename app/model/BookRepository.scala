@@ -1,10 +1,14 @@
 package model
 
-import play.api.libs.concurrent.{Akka, Promise}
 import xml.{PrettyPrinter, Elem}
 import play.api.Play
 import amazon.AmazonClient
-import play.api.Play.current
+import akka.actor._
+import akka.pattern.ask
+import akka.util.Timeout
+import java.util.concurrent.TimeUnit
+import play.api.libs.concurrent._
+import akka.routing.RoundRobinRouter
 
 object BookRepository {
 
@@ -164,18 +168,61 @@ object BookRepository {
       "9078909072")
 
   object BookOrdering extends Ordering[Promise[Book]] {
-      def compare(a: Promise[Book], b: Promise[Book]) = a.await.get.title compare b.await.get.title
+      def compare(a: Promise[Book], b: Promise[Book]) = a.await(60, TimeUnit.SECONDS).get.title compare b.await(60, TimeUnit.SECONDS).get.title
     }
 
-  lazy val books = Promise.sequence((isbns map (b => makeBookAsync(b))).sorted(BookOrdering))
+  val akkaSystem = ActorSystem("PhotoBooksSystem")
 
-  def makeBookAsync(isbn: String): Promise[Book] = {
-    Akka.future[Book] {
-      makeBook(isbn)
+  sys.addShutdownHook({
+    println("Shutting down akka...")
+    akkaSystem.shutdown()
+  })
+
+  sealed trait BookMessage
+  case class MakeBookFromISBN(isbn: String) extends BookMessage
+
+  class BookMakerActor extends Actor with ActorLogging {
+    def receive = {
+      case MakeBookFromISBN(isbn) ⇒ {
+        try {
+          val result = makeBook(isbn)
+          sender ! result
+        } catch {
+          case e: Exception ⇒
+            sender ! akka.actor.Status.Failure(e)
+            throw e
+        }
+      }
     }
   }
 
-  def makeBook(isbn: String): Book = {
+  val bookMakerRouter = akkaSystem.actorOf(
+        Props[BookMakerActor].withRouter(RoundRobinRouter(numberOfBookMakers())), name = "bookMakerRouter")
+
+  def numberOfBookMakers(): Int = {
+    val number = Runtime.getRuntime().availableProcessors() * 100 / (100 - 50)
+    println("Using " + number + " Book Makers...")
+    number
+  }
+
+  lazy private val books = makeBooks(isbns)
+
+  private def makeBooks(isbns: List[String]): Promise[List[Book]] = {
+    implicit val timeout = Timeout(60, TimeUnit.SECONDS)
+    Promise.sequence(isbns.map(isbn => {
+      (bookMakerRouter ? MakeBookFromISBN(isbn)).mapTo[Book].asPromise
+            }))
+  }
+
+  def getBooks(): Promise[List[Book]] = {
+    books
+  }
+
+  def getBook(isbn: String): Promise[List[Book]] = {
+    makeBooks(List(isbn))
+  }
+
+  private def makeBook(isbn: String): Book = {
     println(Thread.currentThread().getName + " - making book: " + isbn)
     val xml = client.findByIsbn(isbn)
     //println(prettyPrintXml(xml))
