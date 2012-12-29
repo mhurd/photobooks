@@ -5,10 +5,12 @@ import model.BookRepository
 
 object Application extends Controller {
 
+  val bookRepository = BookRepository()
+
   def index = Action {
     val start = System.currentTimeMillis()
     Async {
-      BookRepository.getBooks() map (res => {
+      bookRepository.getBooks() map (res => {
         println("total time: " + (System.currentTimeMillis() - start)/1000 + " seconds")
         Ok(views.html.index(res.filter(book => book.valid)))
       })
@@ -17,7 +19,7 @@ object Application extends Controller {
 
   def book(isbn: String) = Action {
     Async {
-      BookRepository.getBook(isbn) map (res => Ok(views.html.book(res.head)))
+      bookRepository.getBook(isbn) map (res => Ok(views.html.book(res.head)))
     }
   }
 

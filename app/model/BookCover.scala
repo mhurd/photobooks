@@ -8,7 +8,7 @@ sealed trait BookCover {
   def size(size: Int): BookCover
 }
 
-case class KnownBookCover(url: String) extends BookCover {
+private case class KnownBookCover(url: String) extends BookCover {
 
   override def toString: String = {
     url
@@ -20,7 +20,7 @@ case class KnownBookCover(url: String) extends BookCover {
 
 }
 
-case class UnknownBookCover() extends BookCover {
+private case class UnknownBookCover() extends BookCover {
 
   def url: String = "Unknown"
 

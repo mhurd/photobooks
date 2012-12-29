@@ -48,24 +48,25 @@ sealed trait Book extends Ordered[Book] {
 
 }
 
-case class KnownBook(isbn: String,
-                     ean: String,
-                     authors: String,
-                     binding: String,
-                     numberOfPages: String,
-                     publicationDate: String,
-                     publisher: String,
-                     title: String,
-                     bookCover: BookCover,
-                     listPrice: Price,
-                     offerSummary: OfferSummary) extends Book {
+private case class KnownBook(isbn: String,
+                             ean: String,
+                             authors: String,
+                             binding: String,
+                             numberOfPages: String,
+                             publicationDate: String,
+                             publisher: String,
+                             title: String,
+                             bookCover: BookCover,
+                             listPrice: Price,
+                             offerSummary: OfferSummary) extends Book {
   def valid: Boolean = true
+
   def bookCover(size: Int): BookCover = {
     bookCover.size(size)
-    }
+  }
 }
 
-case class UnknownBook(isbn: String) extends Book {
+private case class UnknownBook(isbn: String) extends Book {
 
   def ean: String = "Unknown"
 

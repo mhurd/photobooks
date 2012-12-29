@@ -16,7 +16,23 @@ import xml.Elem
 import scala.Predef._
 import scala.RuntimeException
 
-class AmazonClient(private val accessKey: String, private val secretKey: String, private val associateTag: String) {
+trait AmazonClient {
+
+  def findByKeywords(keywords: List[String]): Elem
+
+  def findByIsbn(isbn: String): Elem
+
+}
+
+object AmazonClient {
+
+  def apply(accessKey: String, secretKey: String, associateTag: String): AmazonClient = {
+    new AmazonImpl(accessKey, secretKey, associateTag)
+  }
+
+}
+
+private class AmazonImpl(private val accessKey: String, private val secretKey: String, private val associateTag: String) extends AmazonClient {
 
   // Amazon API Constants
   private val AMAZON_API_VERSION = "2011-08-01"

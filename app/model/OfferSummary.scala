@@ -20,15 +20,15 @@ sealed trait OfferSummary {
 
 }
 
-case class KnownOfferSummary(
-                              lowestUsedPrice: Price,
-                              lowestNewPrice: Price,
-                              totalUsed: String,
-                              totalNew: String
-                              ) extends OfferSummary {
+private case class KnownOfferSummary(
+                                      lowestUsedPrice: Price,
+                                      lowestNewPrice: Price,
+                                      totalUsed: String,
+                                      totalNew: String
+                                      ) extends OfferSummary {
 }
 
-case class UnknownOfferSummary() extends OfferSummary {
+private case class UnknownOfferSummary() extends OfferSummary {
   def lowestUsedPrice: Price = UnknownPrice()
 
   def lowestNewPrice: Price = UnknownPrice()

@@ -10,13 +10,27 @@ import java.util.concurrent.TimeUnit
 import play.api.libs.concurrent._
 import akka.routing.RoundRobinRouter
 
+trait BookRepository {
+
+  def getBooks(): Promise[List[Book]]
+
+  def getBook(isbn: String): Promise[List[Book]]
+
+}
+
 object BookRepository {
 
   private val accessKey = Play.current.configuration.getString("amazon.key.access").get
   private val secretKey = Play.current.configuration.getString("amazon.key.secret").get
   private val associateTag = Play.current.configuration.getString("amazon.associate.tag").get
 
-  private val client = new AmazonClient(accessKey, secretKey, associateTag)
+  def apply(): BookRepository = new BookRepositoryImpl(AmazonClient(accessKey, secretKey, associateTag))
+
+  def apply(amazonClient: AmazonClient): BookRepository = new BookRepositoryImpl(amazonClient)
+
+}
+
+private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends BookRepository {
 
   private val isbns =
     List("0199757143",
@@ -168,8 +182,8 @@ object BookRepository {
       "9078909072")
 
   object BookOrdering extends Ordering[Promise[Book]] {
-      def compare(a: Promise[Book], b: Promise[Book]) = a.await(60, TimeUnit.SECONDS).get.title compare b.await(60, TimeUnit.SECONDS).get.title
-    }
+    def compare(a: Promise[Book], b: Promise[Book]) = a.await(60, TimeUnit.SECONDS).get.title compare b.await(60, TimeUnit.SECONDS).get.title
+  }
 
   val akkaSystem = ActorSystem("PhotoBooksSystem")
 
@@ -178,7 +192,16 @@ object BookRepository {
     akkaSystem.shutdown()
   })
 
+  def numberOfBookMakers(): Int = {
+    val parallelismCoefficient = 80
+    // 1..100, lower for CPU-bound, higher for IO-bound
+    val number = Runtime.getRuntime().availableProcessors() * 100 / (100 - parallelismCoefficient)
+    println("Using " + number + " Book Makers...")
+    number
+  }
+
   sealed trait BookMessage
+
   case class MakeBookFromISBN(isbn: String) extends BookMessage
 
   class BookMakerActor extends Actor with ActorLogging {
@@ -197,13 +220,7 @@ object BookRepository {
   }
 
   val bookMakerRouter = akkaSystem.actorOf(
-        Props[BookMakerActor].withRouter(RoundRobinRouter(numberOfBookMakers())), name = "bookMakerRouter")
-
-  def numberOfBookMakers(): Int = {
-    val number = Runtime.getRuntime().availableProcessors() * 100 / (100 - 50)
-    println("Using " + number + " Book Makers...")
-    number
-  }
+    Props[BookMakerActor].withCreator(new BookMakerActor()).withRouter(RoundRobinRouter(numberOfBookMakers())), name = "bookMakerRouter")
 
   lazy private val books = makeBooks(isbns)
 
@@ -211,20 +228,12 @@ object BookRepository {
     implicit val timeout = Timeout(60, TimeUnit.SECONDS)
     Promise.sequence(isbns.map(isbn => {
       (bookMakerRouter ? MakeBookFromISBN(isbn)).mapTo[Book].asPromise
-            }))
+    }))
   }
 
-  def getBooks(): Promise[List[Book]] = {
-    books
-  }
-
-  def getBook(isbn: String): Promise[List[Book]] = {
-    makeBooks(List(isbn))
-  }
-
-  private def makeBook(isbn: String): Book = {
-    println(Thread.currentThread().getName + " - making book: " + isbn)
-    val xml = client.findByIsbn(isbn)
+  def makeBook(isbn: String): Book = {
+    println(Thread.currentThread().getName + " - looking up book: " + isbn)
+    val xml = amazonClient.findByIsbn(isbn)
     //println(prettyPrintXml(xml))
     try {
       Book.fromXml(isbn, xml)
@@ -238,6 +247,14 @@ object BookRepository {
   private def prettyPrintXml(xml: Elem): String = {
     val pretty = new PrettyPrinter(80, 2)
     pretty.format(xml)
+  }
+
+  def getBooks(): Promise[List[Book]] = {
+    books
+  }
+
+  def getBook(isbn: String): Promise[List[Book]] = {
+    makeBooks(List(isbn))
   }
 
 }
