@@ -232,7 +232,7 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
     implicit val timeout = Timeout(60, TimeUnit.SECONDS)
     Promise.sequence(isbns.map(isbn => {
       (bookMakerRouter ? MakeBookFromISBN(isbn)).mapTo[Book].asPromise
-    }))
+    }).sorted(BookOrdering))
   }
 
   def makeBook(isbn: String): Book = {
