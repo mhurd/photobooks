@@ -183,7 +183,8 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
       "0870706829",
       "3775731482",
       "0870708120",
-      "0957434103")
+      "0957434103",
+      "0870700944")
 
   object BookOrdering extends Ordering[Promise[Book]] {
     def compare(a: Promise[Book], b: Promise[Book]) = a.await(60, TimeUnit.SECONDS).get.title compare b.await(60, TimeUnit.SECONDS).get.title
