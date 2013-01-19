@@ -3,9 +3,14 @@
 @main(book.title, googleAnalyticsCode){
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/book.css")" />
 }{
+
     <div id="banner">
-        <h1>@book.title - @book.authors</h1>
+        <h1>@{book.authors match {
+            case "" =>  book.title
+            case _ =>   book.title + "-" + book.authors
+        }}</h1>
     </div>
+
     <div id="book">
         <table class="table">
             <tr>
@@ -14,7 +19,10 @@
                 </td>
                 <td align="left">
                     <dl class="dl-horizontal">
-                        <dt>Author(s):</dt> <dd>@book.authors</dd>
+                        <dt>Author(s):</dt> <dd>@{book.authors match {
+                                                    case "" =>  "Not set"
+                                                    case _ =>   book.authors
+                                                }}</dd>
                         <dt>Publisher:</dt> <dd>@book.publisher</dd>
                         <dt>Publication Date:</dt> <dd>@book.publicationDate</dd>
                         <dt>Binding:</dt> <dd>@book.binding</dd>

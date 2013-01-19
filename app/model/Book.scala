@@ -107,10 +107,7 @@ object Book {
         new KnownBook(
           itemAttributesNode \ "ISBN" text,
           itemAttributesNode \ "EAN" text,
-          {
-            val authors = itemAttributesNode \ "Author" map (f => f.text) mkString (", ")
-            if (authors == "") "Not Set" else authors
-          },
+          itemAttributesNode \ "Author" map (f => f.text) mkString (", "),
           itemAttributesNode \ "Binding" text,
           pages,
           itemAttributesNode \ "PublicationDate" text,
