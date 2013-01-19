@@ -1,63 +1,16 @@
-@(books: List[model.Book], googleAnalyticsCode: String)
-<!DOCTYPE html>
+@(books: List[model.Book], googleAnalyticsCode: String)(implicit lang: Lang)
 
-<html>
-<head>
-    <meta charset=utf-8/>
-    <title>Photobooks</title>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")" />
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/jquery.peepshow.css")" />
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at(" images/favicon.png")" />
-    <link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
-    <!--[if lt IE 8]>
-    <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/jquery.peepshow.ie7.css")" />
-    <![endif]-->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
-    <script src="@routes.Assets.at("javascripts/jquery.peepshow.min.js")" type="text/javascript"></script>
-    <script type = "text/javascript" >
-            $(document).ready(function () {
-                $("#tiles").peepshow({
-                    crop:[140, 140],
-                    itemsPerRow:6,
-                    imageNotFound:"@routes.Assets.at("images/image-not-found.jpg")",
-                    rotateSpeed: 1000000,
-                    showLoader: true,
-                    autoMarginRatio: 0.1
-            });
-    });
-    </script>
-</head>
-<body>
-<div id="banner">
-    <h1>Fleetingphotons Photobook Library</h1>
-</div>
-<div id="page">
-    <div id="tiles">
-        <ul>
+@main("Photobooks", googleAnalyticsCode){
+}{
+    <div id="tiles" class="container">
+        <ul class="thumbnails">
             @for(book <- books) {
             <li>
                 <a href="/books/@book.isbn">
-                    <img src="@book.bookCover(115)" thumb="1"/>
-                    <img src="@book.bookCover(270)" caption="@book.title" alt="@book.title"/>
+                    <img class="thumbnail" src="@book.bookCover(180)" caption="@book.title" alt="@book.title"/>
                 </a>
             </li>
             }
         </ul>
     </div>
-</div>
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', '@googleAnalyticsCode']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
-</body>
-</html>
-
+}

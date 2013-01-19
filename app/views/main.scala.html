@@ -1,0 +1,47 @@
+@(title: String, googleAnalyticsCode: String)(head: Html)(content: Html)(implicit lang: Lang)
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>@title</title>
+        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")"/>
+        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-responsive.css")"/>
+        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.at("stylesheets/main.css")"/>
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")" />
+        <link href="http://fonts.googleapis.com/css?family=Poiret+One" rel="stylesheet" type="text/css"/>
+        @head
+    </head>
+    <body>
+        <div class="screenshot">
+
+            <div class="navbar navber-fixed-top">
+                <div class="navbar-inner">
+                    <div class="container">
+                        <a class="brand" href="@routes.Application.index()">
+                            @Messages("application.name")
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                @content
+            </div>
+
+        </div>
+        <script type="text/javascript">
+
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', '@googleAnalyticsCode']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+
+        </script>
+
+    </body>
+</html>

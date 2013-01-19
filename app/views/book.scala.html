@@ -1,46 +1,32 @@
 @(book: model.Book, googleAnalyticsCode: String)
-<!DOCTYPE html>
 
-<html>
-<head>
-    <meta charset=utf-8/>
-    <title>Photobooks</title>
+@main(book.title, googleAnalyticsCode){
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/book.css")" />
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at(" images/favicon.png")" />
-    <link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
-</head>
-<body>
-<div id="body">
+}{
     <div id="banner">
-        <h2>@book.title</h2>
+        <h1>@book.title - @book.authors</h1>
     </div>
     <div id="book">
-        <img src="@book.bookCover" caption="@book.title" alt="@book.title"/>
-        <ul>
-            <li>Author(s): @book.authors</li>
-            <li>Publisher: @book.publisher</li>
-            <li>Publication Date: @book.publicationDate</li>
-            <li>Binding: @book.binding</li>
-            <li>ISBN: @book.isbn</li>
-            <li>List price: @book.listPrice</li>
-            <li>Lowest Used Price: @book.offerSummary.lowestUsedPrice</li>
-            <li>Lowest New Price: @book.offerSummary.lowestNewPrice</li>
-        </ul>
+        <table class="table">
+            <tr>
+                <td align="right">
+                    <img style="float: right" src="@book.bookCover" caption="@book.title" alt="@book.title"/>
+                </td>
+                <td align="left">
+                    <dl class="dl-horizontal">
+                        <dt>Author(s):</dt> <dd>@book.authors</dd>
+                        <dt>Publisher:</dt> <dd>@book.publisher</dd>
+                        <dt>Publication Date:</dt> <dd>@book.publicationDate</dd>
+                        <dt>Binding:</dt> <dd>@book.binding</dd>
+                        <dt>ISBN:</dt> <dd>@book.isbn</dd>
+                        <dt>List price:</dt> <dd>@book.listPrice</dd>
+                        <dt>Lowest Used Price:</dt> <dd>@book.offerSummary.lowestUsedPrice</dd>
+                        <dt>Lowest New Price:</dt> <dd>@book.offerSummary.lowestNewPrice</dd>
+                    </dl>
+                </td>
+            </tr>
+        </table>
+
     </div>
-</div>
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', '@googleAnalyticsCode']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
-</body>
-</html>
+}
 
