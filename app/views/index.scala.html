@@ -1,13 +1,18 @@
 @(books: List[model.Book], googleAnalyticsCode: String)(implicit lang: Lang)
 
 @main("Photobooks", googleAnalyticsCode){
+    <script>
+        jQuery(function ($) {
+            $("a").tooltip()
+        });
+    </script>
 }{
-    <div id="tiles" class="container">
+    <div class="row">
         <ul class="thumbnails">
             @for(book <- books) {
-            <li>
-                <a href="/books/@book.isbn">
-                    <img class="thumbnail" src="@book.bookCover(180)" caption="@book.title" alt="@book.title"/>
+            <li class="span2" style="height: 170px">
+                <a class="thumbnail" rel="tooltip" data-delay="1000" title="@book.title" href="/books/@book.isbn">
+                    <img src="@book.bookCover(170)" caption="@book.title" alt="@book.title"/>
                 </a>
             </li>
             }

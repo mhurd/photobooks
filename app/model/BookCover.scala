@@ -25,7 +25,7 @@ private case class UnknownBookCover() extends BookCover {
   def url: String = "Unknown"
 
   override def toString: String = {
-    "Unknown"
+    "/assets/images/no-image.jpg"
   }
 
   def size(size: Int): BookCover = this
