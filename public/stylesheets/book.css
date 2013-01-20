@@ -1,9 +1,13 @@
-#banner { height: 120px; }
+#banner {
+    padding-bottom: 20px;
+}
 
 #banner h1, h2 {
     letter-spacing: -2px;
     font-family: 'Poiret One', cursive;
     font-size: 36px;
-    text-align: center;}
+}
+
+
 
 
