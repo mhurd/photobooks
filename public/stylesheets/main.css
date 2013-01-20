@@ -4,4 +4,12 @@
     letter-spacing: -2px;
     font-family: 'Poiret One', cursive;
     font-size: 64px;
-    text-align: center;}
+    text-align: center;
+}
+
+.small-text {
+    margin-top: 10px;
+    font-family: 'Poiret One', cursive;
+    font-size: 14px;
+    text-align: center;
+}

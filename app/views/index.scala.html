@@ -10,7 +10,7 @@
     <div class="row">
         <ul class="thumbnails">
             @for(book <- books) {
-                <li class="span2" style="height: 170px">
+                <li class="span2" style="height: 180px">
                     <a class="thumbnail" rel="tooltip" data-delay="1000" title="@book.title" href="/books/@book.isbn">
                         <img src="@book.bookCover(170)" caption="@book.title" alt="@book.title"/>
                     </a>
