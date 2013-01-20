@@ -1,6 +1,8 @@
 @(books: List[model.Book], googleAnalyticsCode: String)(implicit lang: Lang)
 
 @main("Photobooks", googleAnalyticsCode){
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="@routes.Assets.at("javascripts/bootstrap.min.js")"></script>
     <script>
         jQuery(function ($) {
             $("a").tooltip()
