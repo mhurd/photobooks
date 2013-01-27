@@ -96,7 +96,7 @@ private case class UnknownBook(isbn: String) extends Book {
 
 object Book {
 
-  def fromXml(isbn: String, xml: Elem): Book = {
+  def fromAmazonXml(isbn: String, xml: Elem): Book = {
     (xml \\ "Error").size match {
       case 0 => {
         val itemAttributesNode = xml \ "Items" \ "Item" \ "ItemAttributes"
@@ -113,9 +113,9 @@ object Book {
           itemAttributesNode \ "PublicationDate" text,
           itemAttributesNode \ "Publisher" text,
           itemAttributesNode \ "Title" text,
-          BookCover.fromXml(xml),
-          Price.fromXml(itemAttributesNode \ "ListPrice"),
-          OfferSummary.fromXml(xml)
+          BookCover.fromAmazonXml(xml),
+          Price.fromAmazonXml(itemAttributesNode \ "ListPrice"),
+          OfferSummary.fromAmazonXml(xml)
         )
       }
       case _ => {

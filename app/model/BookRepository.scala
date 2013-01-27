@@ -241,7 +241,7 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
     val xml = amazonClient.findByIsbn(isbn)
     //println(prettyPrintXml(xml))
     try {
-      Book.fromXml(isbn, xml)
+      Book.fromAmazonXml(isbn, xml)
     } catch {
       case nfe: NumberFormatException => {
         throw nfe

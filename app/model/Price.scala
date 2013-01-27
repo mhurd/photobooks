@@ -25,7 +25,7 @@ private case class KnownPrice(
 
 object Price {
 
-  def fromXml(priceNode: NodeSeq): Price = {
+  def fromAmazonXml(priceNode: NodeSeq): Price = {
     priceNode.size match {
       case 0 => UnknownPrice()
       case 1 => KnownPrice(

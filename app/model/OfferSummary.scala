@@ -66,7 +66,7 @@ object OfferSummary {
     }
   }
 
-  def fromXml(xml: Elem): OfferSummary = {
+  def fromAmazonXml(xml: Elem): OfferSummary = {
     val offerSummaryNode = xml \ "Items" \ "Item" \ "OfferSummary"
     val totalUsed = (offerSummaryNode \ "TotalUsed").text
     val totalNew = (offerSummaryNode \ "TotalNew").text

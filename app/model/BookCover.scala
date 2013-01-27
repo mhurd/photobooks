@@ -41,7 +41,7 @@ object BookCover {
     }
   }
 
-  def fromXml(xml: Elem): BookCover = {
+  def fromAmazonXml(xml: Elem): BookCover = {
     val largeImageNode = xml \ "Items" \ "Item" \ "LargeImage"
     bookCovers(largeImageNode)
   }
