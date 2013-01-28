@@ -1,7 +1,9 @@
 package model
 
-import xml.Elem
-import play.api.libs.json.{JsString, JsObject, JsValue, Format}
+import xml.{NodeSeq, Elem}
+import play.api.libs.json._
+import play.api.libs.json.JsObject
+import play.api.libs.json.JsString
 
 sealed trait Book extends Ordered[Book] {
 
@@ -9,17 +11,17 @@ sealed trait Book extends Ordered[Book] {
 
   def ean: String
 
-  def authors: String
-
-  def binding: String
-
-  def numberOfPages: String
-
-  def publicationDate: String
-
-  def publisher: String
-
   def title: String
+
+  def authors: Option[String]
+
+  def binding: Option[String]
+
+  def numberOfPages: Option[String]
+
+  def publicationDate: Option[String]
+
+  def publisher: Option[String]
 
   def bookCover: BookCover
 
@@ -49,49 +51,23 @@ sealed trait Book extends Ordered[Book] {
 
 }
 
-private case class KnownBook(isbn: String,
-                             ean: String,
-                             authors: String,
-                             binding: String,
-                             numberOfPages: String,
-                             publicationDate: String,
-                             publisher: String,
-                             title: String,
-                             bookCover: BookCover,
-                             listPrice: Price,
-                             offerSummary: OfferSummary) extends Book {
+private case class BookImpl(isbn: String,
+                       ean: String,
+                       title: String,
+                       authors: Option[String],
+                       binding: Option[String],
+                       numberOfPages: Option[String],
+                       publicationDate: Option[String],
+                       publisher: Option[String],
+                       bookCover: BookCover,
+                       listPrice: Price,
+                       offerSummary: OfferSummary) extends Book {
+
   def valid: Boolean = true
 
   def bookCover(size: Int): BookCover = {
     bookCover.size(size)
   }
-}
-
-private case class UnknownBook(isbn: String) extends Book {
-
-  def ean: String = "Unknown"
-
-  def authors: String = "Unknown"
-
-  def binding: String = "Unknown"
-
-  def numberOfPages: String = "Unknown"
-
-  def publicationDate: String = "Unknown"
-
-  def publisher: String = "Unknown"
-
-  def title: String = "Unknown"
-
-  def bookCover: BookCover = UnknownBookCover()
-
-  def listPrice: Price = UnknownPrice()
-
-  def offerSummary: OfferSummary = UnknownOfferSummary()
-
-  def valid: Boolean = false
-
-  def bookCover(size: Int): BookCover = UnknownBookCover()
 
 }
 
@@ -99,15 +75,15 @@ object Book {
 
   implicit object BookFormat extends Format[Book] {
 
-    def reads(json: JsValue): Book = KnownBook(
+    def reads(json: JsValue): Book = BookImpl(
       (json \ "isbn").as[String],
       (json \ "ean").as[String],
-      (json \ "authors").as[String],
-      (json \ "binding").as[String],
-      (json \ "numberOfPages").as[String],
-      (json \ "publicationDate").as[String],
-      (json \ "publisher").as[String],
       (json \ "title").as[String],
+      (json \ "authors").as[Option[String]],
+      (json \ "binding").as[Option[String]],
+      (json \ "numberOfPages").as[Option[String]],
+      (json \ "publicationDate").as[Option[String]],
+      (json \ "publisher").as[Option[String]],
       BookCover.BookCoverFormat.reads(json \ "bookCover"),
       Price.PriceFormat.reads(json \ "listPrice"),
       OfferSummary.OfferSummaryFormat.reads(json \ "offerSummary"))
@@ -115,43 +91,50 @@ object Book {
     def writes(book: Book): JsValue = JsObject(List(
       "isbn" -> JsString(book.isbn),
       "ean" -> JsString(book.ean),
-      "authors" -> JsString(book.authors),
-      "binding" -> JsString(book.binding),
-      "numberOfPages" -> JsString(book.numberOfPages),
-      "publicationDate" -> JsString(book.publicationDate),
-      "publisher" -> JsString(book.publisher),
       "title" -> JsString(book.title),
+      "authors" -> Json.toJson(book.authors),
+      "binding" -> Json.toJson(book.binding),
+      "numberOfPages" -> Json.toJson(book.numberOfPages),
+      "publicationDate" -> Json.toJson(book.publicationDate),
+      "publisher" -> Json.toJson(book.publisher),
       "bookCover" -> BookCover.BookCoverFormat.writes(book.bookCover),
       "listPrice" -> Price.PriceFormat.writes(book.listPrice),
       "offerSummary" -> OfferSummary.OfferSummaryFormat.writes(book.offerSummary)))
 
   }
 
-  def fromAmazonXml(isbn: String, xml: Elem): Book = {
+  private def getOptionText(node: NodeSeq): Option[String] =
+    node.headOption match {
+      case None => None
+      case Some(aNode) => Some(aNode.text)
+    }
+
+  def fromAmazonXml(isbn: String, xml: Elem): Option[Book] = {
     (xml \\ "Error").size match {
       case 0 => {
         val itemAttributesNode = xml \ "Items" \ "Item" \ "ItemAttributes"
-        val pages = (itemAttributesNode \ "NumberOfPages").text match {
-          case "" => "Unknown"
-          case _ => (itemAttributesNode \ "NumberOfPages").text
+        val authorsString = (itemAttributesNode \ "Author" map (f => f.text) mkString (", "))
+        val authors = authorsString match {
+          case "" => None
+          case _ => Some(authorsString)
         }
-        new KnownBook(
+        Some(new BookImpl(
           itemAttributesNode \ "ISBN" text,
           itemAttributesNode \ "EAN" text,
-          itemAttributesNode \ "Author" map (f => f.text) mkString (", "),
-          itemAttributesNode \ "Binding" text,
-          pages,
-          itemAttributesNode \ "PublicationDate" text,
-          itemAttributesNode \ "Publisher" text,
           itemAttributesNode \ "Title" text,
+          authors,
+          getOptionText(itemAttributesNode \ "Binding"),
+          getOptionText(itemAttributesNode \ "NumberOfPages"),
+          getOptionText(itemAttributesNode \ "PublicationDate"),
+          getOptionText(itemAttributesNode \ "Publisher"),
           BookCover.fromAmazonXml(xml),
           Price.fromAmazonXml(itemAttributesNode \ "ListPrice"),
           OfferSummary.fromAmazonXml(xml)
-        )
+        ))
       }
       case _ => {
         println("Could not find book: " + isbn)
-        UnknownBook(isbn)
+        None
       }
     }
   }

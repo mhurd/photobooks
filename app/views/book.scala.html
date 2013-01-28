@@ -6,8 +6,8 @@
 
     <div id="banner">
         <h1>@{book.authors match {
-            case "" =>  book.title
-            case _ =>   book.title + "  -  " + book.authors
+            case None =>  book.title
+            case Some(_) =>   book.title + "  -  " + book.authors
         }}</h1>
     </div>
 
@@ -20,8 +20,8 @@
                 <td align="left">
                     <dl class="dl-horizontal">
                         <dt>Author(s):</dt> <dd>@{book.authors match {
-                                                    case "" =>  "Not set"
-                                                    case _ =>   book.authors
+                                                    case None =>  "Not set"
+                                                    case Some(_) =>   book.authors
                                                 }}</dd>
                         <dt>Publisher:</dt> <dd>@book.publisher</dd>
                         <dt>Publication Date:</dt> <dd>@book.publicationDate</dd>

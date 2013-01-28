@@ -186,7 +186,10 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
       "0870700944")
 
   object BookOrdering extends Ordering[Promise[Book]] {
-    def compare(a: Promise[Book], b: Promise[Book]) = a.await(60, TimeUnit.SECONDS).get.title compare b.await(60, TimeUnit.SECONDS).get.title
+    def compare(a: Promise[Book], b: Promise[Book]) = {
+      a.await(60, TimeUnit.SECONDS).get.title compare b.await(60, TimeUnit.SECONDS).get.title
+    }
+
   }
 
   val akkaSystem = ActorSystem("PhotoBooksSystem")
@@ -213,7 +216,9 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
       case MakeBookFromISBN(isbn) ⇒ {
         try {
           val book = makeBook(isbn)
-          sender ! book
+          if (book.isDefined) {
+            sender ! book.get
+          }
         } catch {
           case e: Exception ⇒
             sender ! akka.actor.Status.Failure(e)
@@ -235,7 +240,7 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
     }).sorted(BookOrdering))
   }
 
-  def makeBook(isbn: String): Book = {
+  def makeBook(isbn: String): Option[Book] = {
     println(Thread.currentThread().getName + " - looking up book: " + isbn)
     val xml = amazonClient.findByIsbn(isbn)
     try {
