@@ -1,6 +1,7 @@
 package model
 
 import xml.Elem
+import play.api.libs.json.{JsString, JsObject, JsValue, Format}
 
 sealed trait Book extends Ordered[Book] {
 
@@ -95,6 +96,36 @@ private case class UnknownBook(isbn: String) extends Book {
 }
 
 object Book {
+
+  implicit object BookFormat extends Format[Book] {
+
+    def reads(json: JsValue): Book = KnownBook(
+      (json \ "isbn").as[String],
+      (json \ "ean").as[String],
+      (json \ "authors").as[String],
+      (json \ "binding").as[String],
+      (json \ "numberOfPages").as[String],
+      (json \ "publicationDate").as[String],
+      (json \ "publisher").as[String],
+      (json \ "title").as[String],
+      BookCover.BookCoverFormat.reads(json \ "bookCover"),
+      Price.PriceFormat.reads(json \ "listPrice"),
+      OfferSummary.OfferSummaryFormat.reads(json \ "offerSummary"))
+
+    def writes(book: Book): JsValue = JsObject(List(
+      "isbn" -> JsString(book.isbn),
+      "ean" -> JsString(book.ean),
+      "authors" -> JsString(book.authors),
+      "binding" -> JsString(book.binding),
+      "numberOfPages" -> JsString(book.numberOfPages),
+      "publicationDate" -> JsString(book.publicationDate),
+      "publisher" -> JsString(book.publisher),
+      "title" -> JsString(book.title),
+      "bookCover" -> BookCover.BookCoverFormat.writes(book.bookCover),
+      "listPrice" -> Price.PriceFormat.writes(book.listPrice),
+      "offerSummary" -> OfferSummary.OfferSummaryFormat.writes(book.offerSummary)))
+
+  }
 
   def fromAmazonXml(isbn: String, xml: Elem): Book = {
     (xml \\ "Error").size match {

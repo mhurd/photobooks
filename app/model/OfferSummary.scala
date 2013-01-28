@@ -1,6 +1,8 @@
 package model
 
 import xml.{NodeSeq, Elem}
+import play.api.libs.json._
+import play.api.libs.json.JsObject
 
 sealed trait OfferSummary {
   def lowestUsedPrice: Price
@@ -64,6 +66,23 @@ object OfferSummary {
       case "0" => UnknownPrice()
       case _ => realPrice(offerSummaryNode \ "LowestNewPrice")
     }
+  }
+
+  implicit object OfferSummaryFormat extends Format[OfferSummary] {
+
+    def reads(json: JsValue): OfferSummary = KnownOfferSummary(
+      Price.PriceFormat.reads(json \ "lowestUsedPrice"),
+      Price.PriceFormat.reads(json \ "lowestNewPrice"),
+      (json \ "totalUsed").as[String],
+      (json \ "totalNew").as[String]
+    )
+
+    def writes(offerSummary: OfferSummary): JsValue = JsObject(List(
+      "lowestUsedPrice" -> Price.PriceFormat.writes(offerSummary.lowestUsedPrice),
+      "lowestNewPrice" -> Price.PriceFormat.writes(offerSummary.lowestNewPrice),
+      "totalUsed" -> JsString(offerSummary.totalUsed),
+      "totalNew" -> JsString(offerSummary.totalNew)))
+
   }
 
   def fromAmazonXml(xml: Elem): OfferSummary = {

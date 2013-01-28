@@ -1,6 +1,7 @@
 package model
 
 import xml.{NodeSeq, Elem}
+import play.api.libs.json.{JsString, JsObject, JsValue, Format}
 
 sealed trait BookCover {
   def url: String
@@ -33,6 +34,15 @@ private case class UnknownBookCover() extends BookCover {
 }
 
 object BookCover {
+
+  implicit object BookCoverFormat extends Format[BookCover] {
+
+    def reads(json: JsValue): BookCover = KnownBookCover((json \ "url").as[String])
+
+    def writes(bookCover: BookCover): JsValue = JsObject(List(
+      "url" -> JsString(bookCover.url)))
+
+  }
 
   private def bookCovers(largeImageNode: NodeSeq): BookCover = {
     largeImageNode.size match {

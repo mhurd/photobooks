@@ -1,6 +1,5 @@
 package model
 
-import xml.{PrettyPrinter, Elem}
 import play.api.Play
 import amazon.AmazonClient
 import akka.actor._
@@ -213,8 +212,8 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
     def receive = {
       case MakeBookFromISBN(isbn) ⇒ {
         try {
-          val result = makeBook(isbn)
-          sender ! result
+          val book = makeBook(isbn)
+          sender ! book
         } catch {
           case e: Exception ⇒
             sender ! akka.actor.Status.Failure(e)
@@ -239,7 +238,6 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
   def makeBook(isbn: String): Book = {
     println(Thread.currentThread().getName + " - looking up book: " + isbn)
     val xml = amazonClient.findByIsbn(isbn)
-    //println(prettyPrintXml(xml))
     try {
       Book.fromAmazonXml(isbn, xml)
     } catch {
@@ -247,11 +245,6 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
         throw nfe
       }
     }
-  }
-
-  private def prettyPrintXml(xml: Elem): String = {
-    val pretty = new PrettyPrinter(80, 2)
-    pretty.format(xml)
   }
 
   def getBooks(): Promise[List[Book]] = {
