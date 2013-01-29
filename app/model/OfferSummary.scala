@@ -5,9 +5,9 @@ import play.api.libs.json._
 import play.api.libs.json.JsObject
 
 sealed trait OfferSummary {
-  def lowestUsedPrice: Price
+  def lowestUsedPrice: Option[Price]
 
-  def lowestNewPrice: Price
+  def lowestNewPrice: Option[Price]
 
   def totalUsed: String
 
@@ -22,79 +22,75 @@ sealed trait OfferSummary {
 
 }
 
-private case class KnownOfferSummary(
-                                      lowestUsedPrice: Price,
-                                      lowestNewPrice: Price,
-                                      totalUsed: String,
-                                      totalNew: String
-                                      ) extends OfferSummary {
-}
-
-private case class UnknownOfferSummary() extends OfferSummary {
-  def lowestUsedPrice: Price = UnknownPrice()
-
-  def lowestNewPrice: Price = UnknownPrice()
-
-  def totalUsed: String = "Unknown"
-
-  def totalNew: String = "Unknown"
+private case class OfferSummaryImpl(
+                                     lowestUsedPrice: Option[Price],
+                                     lowestNewPrice: Option[Price],
+                                     totalUsed: String,
+                                     totalNew: String
+                                     ) extends OfferSummary {
 }
 
 object OfferSummary {
 
   private def realPrice(priceNode: NodeSeq): Price = {
-    priceNode.size match {
-      case 0 => UnknownPrice()
-      case 1 => KnownPrice(
-        (priceNode \ "Amount" text) toInt,
-        priceNode \ "CurrencyCode" text,
-        priceNode \ "FormattedPrice" text
-      )
-      case _ => throw new IllegalArgumentException("Expected 1 price node, found: " + priceNode.size)
-    }
+    PriceImpl(
+      (priceNode \ "Amount" text) toInt,
+      priceNode \ "CurrencyCode" text,
+      priceNode \ "FormattedPrice" text)
   }
 
-  private def lowestUsedPrice(offerSummaryNode: NodeSeq, total: String): Price = {
+  private def lowestUsedPrice(offerSummaryNode: NodeSeq, total: String): Option[Price] = {
     total match {
-      case "0" => UnknownPrice()
-      case _ => realPrice(offerSummaryNode \ "LowestUsedPrice")
+      case "0" => None
+      case _ => Some(realPrice(offerSummaryNode \ "LowestUsedPrice"))
     }
   }
 
-  private def lowestNewPrice(offerSummaryNode: NodeSeq, total: String): Price = {
+  private def lowestNewPrice(offerSummaryNode: NodeSeq, total: String): Option[Price] = {
     total match {
-      case "0" => UnknownPrice()
-      case _ => realPrice(offerSummaryNode \ "LowestNewPrice")
+      case "0" => None
+      case _ => Some(realPrice(offerSummaryNode \ "LowestNewPrice"))
     }
   }
 
-  implicit object OfferSummaryFormat extends Format[OfferSummary] {
+  implicit object OfferSummaryFormat extends Format[Option[OfferSummary]] {
 
-    def reads(json: JsValue): OfferSummary = KnownOfferSummary(
-      Price.PriceFormat.reads(json \ "lowestUsedPrice"),
-      Price.PriceFormat.reads(json \ "lowestNewPrice"),
-      (json \ "totalUsed").as[String],
-      (json \ "totalNew").as[String]
-    )
+    def reads(json: JsValue): Option[OfferSummary] =
+      json match {
+        case JsUndefined(_) => None
+        case JsNull => None
+        case _ => {
+          Some(OfferSummaryImpl(Price.PriceFormat.reads(json \ "lowestUsedPrice"),
+            Price.PriceFormat.reads(json \ "lowestNewPrice"),
+            (json \ "totalUsed").as[String],
+            (json \ "totalNew").as[String]))
+        }
+      }
 
-    def writes(offerSummary: OfferSummary): JsValue = JsObject(List(
-      "lowestUsedPrice" -> Price.PriceFormat.writes(offerSummary.lowestUsedPrice),
-      "lowestNewPrice" -> Price.PriceFormat.writes(offerSummary.lowestNewPrice),
-      "totalUsed" -> JsString(offerSummary.totalUsed),
-      "totalNew" -> JsString(offerSummary.totalNew)))
+    def writes(offerSummaryOption: Option[OfferSummary]): JsValue =
+      offerSummaryOption match {
+        case None => JsNull
+        case Some(offerSummary) => {
+          JsObject(List(
+            "lowestUsedPrice" -> Price.PriceFormat.writes(offerSummary.lowestUsedPrice),
+            "lowestNewPrice" -> Price.PriceFormat.writes(offerSummary.lowestNewPrice),
+            "totalUsed" -> JsString(offerSummary.totalUsed),
+            "totalNew" -> JsString(offerSummary.totalNew)))
+        }
+      }
 
   }
 
-  def fromAmazonXml(xml: Elem): OfferSummary = {
+  def fromAmazonXml(xml: Elem): Option[OfferSummary] = {
     val offerSummaryNode = xml \ "Items" \ "Item" \ "OfferSummary"
     val totalUsed = (offerSummaryNode \ "TotalUsed").text
     val totalNew = (offerSummaryNode \ "TotalNew").text
-    KnownOfferSummary(
+    Some(OfferSummaryImpl(
       lowestUsedPrice(offerSummaryNode, totalUsed),
       lowestNewPrice(offerSummaryNode, totalNew),
       totalUsed,
       totalNew
-    )
+    ))
   }
 
 }

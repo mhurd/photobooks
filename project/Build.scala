@@ -12,7 +12,8 @@ object ApplicationBuild extends Build {
       "com.twitter" % "finagle-http" % "5.3.22",
       "commons-codec" % "commons-codec" % "1.7",
       "joda-time" % "joda-time" % "2.0",
-      "com.mongodb.casbah" % "casbah_2.9.1" % "2.1.5-1"
+      "com.mongodb.casbah" % "casbah_2.9.1" % "2.1.5-1",
+      "org.scalatest" %% "scalatest" % "1.8" % "test"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(

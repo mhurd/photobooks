@@ -200,8 +200,7 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
   })
 
   def numberOfBookMakers(): Int = {
-    val parallelismCoefficient = 80
-    // 1..100, lower for CPU-bound, higher for IO-bound
+    val parallelismCoefficient = 80 // 1..100, lower for CPU-bound, higher for IO-bound
     val number = Runtime.getRuntime().availableProcessors() * 100 / (100 - parallelismCoefficient)
     println("Using " + number + " Book Makers...")
     number

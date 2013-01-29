@@ -7,9 +7,9 @@ import play.api.libs.json.JsString
 
 sealed trait Book extends Ordered[Book] {
 
-  def isbn: String
+  def isbn: Option[String]
 
-  def ean: String
+  def ean: Option[String]
 
   def title: String
 
@@ -25,9 +25,17 @@ sealed trait Book extends Ordered[Book] {
 
   def bookCover: BookCover
 
-  def listPrice: Price
+  def listPrice: Option[Price]
 
-  def offerSummary: OfferSummary
+  def offerSummary: Option[OfferSummary]
+
+  def displayableAuthors: String
+
+  def displayableListPrice: String
+
+  def displayableLowestNewPrice: String
+
+  def displayableLowestUsedPrice: String
 
   override def toString: String = {
     "TITLE: " + title + "\n" +
@@ -51,17 +59,17 @@ sealed trait Book extends Ordered[Book] {
 
 }
 
-private case class BookImpl(isbn: String,
-                       ean: String,
-                       title: String,
-                       authors: Option[String],
-                       binding: Option[String],
-                       numberOfPages: Option[String],
-                       publicationDate: Option[String],
-                       publisher: Option[String],
-                       bookCover: BookCover,
-                       listPrice: Price,
-                       offerSummary: OfferSummary) extends Book {
+private case class BookImpl(isbn: Option[String],
+                            ean: Option[String],
+                            title: String,
+                            authors: Option[String],
+                            binding: Option[String],
+                            numberOfPages: Option[String],
+                            publicationDate: Option[String],
+                            publisher: Option[String],
+                            bookCover: BookCover,
+                            listPrice: Option[Price],
+                            offerSummary: Option[OfferSummary]) extends Book {
 
   def valid: Boolean = true
 
@@ -69,6 +77,39 @@ private case class BookImpl(isbn: String,
     bookCover.size(size)
   }
 
+  def displayableAuthors: String =
+    authors match {
+      case None =>  "Not set"
+      case Some(_) => authors.get
+    }
+
+  def displayableListPrice: String =
+    listPrice match {
+      case None => "None found"
+      case Some(listPriceMatch) => listPriceMatch.formattedPrice
+    }
+
+  def displayableLowestNewPrice: String =
+    offerSummary match {
+      case None =>  "None found"
+        case Some(offerSummaryMatch) => {
+          offerSummaryMatch.lowestNewPrice match {
+            case None => "None found"
+            case Some(price) => price.formattedPrice
+          }
+        }
+    }
+
+  def displayableLowestUsedPrice: String =
+    offerSummary match {
+          case None =>  "None found"
+            case Some(offerSummaryMatch) => {
+              offerSummaryMatch.lowestUsedPrice match {
+                case None => "None found"
+                case Some(price) => price.formattedPrice
+              }
+            }
+        }
 }
 
 object Book {
@@ -76,8 +117,8 @@ object Book {
   implicit object BookFormat extends Format[Book] {
 
     def reads(json: JsValue): Book = BookImpl(
-      (json \ "isbn").as[String],
-      (json \ "ean").as[String],
+      (json \ "isbn").as[Option[String]],
+      (json \ "ean").as[Option[String]],
       (json \ "title").as[String],
       (json \ "authors").as[Option[String]],
       (json \ "binding").as[Option[String]],
@@ -89,8 +130,8 @@ object Book {
       OfferSummary.OfferSummaryFormat.reads(json \ "offerSummary"))
 
     def writes(book: Book): JsValue = JsObject(List(
-      "isbn" -> JsString(book.isbn),
-      "ean" -> JsString(book.ean),
+      "isbn" -> Json.toJson(book.isbn),
+      "ean" -> Json.toJson(book.ean),
       "title" -> JsString(book.title),
       "authors" -> Json.toJson(book.authors),
       "binding" -> Json.toJson(book.binding),
@@ -119,8 +160,8 @@ object Book {
           case _ => Some(authorsString)
         }
         Some(new BookImpl(
-          itemAttributesNode \ "ISBN" text,
-          itemAttributesNode \ "EAN" text,
+          getOptionText(itemAttributesNode \ "ISBN"),
+          getOptionText(itemAttributesNode \ "EAN"),
           itemAttributesNode \ "Title" text,
           authors,
           getOptionText(itemAttributesNode \ "Binding"),
