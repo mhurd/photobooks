@@ -183,7 +183,8 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
       "3775731482",
       "0870708120",
       "0957434103",
-      "0870700944")
+      "0870700944",
+      "190789327X")
 
   object BookOrdering extends Ordering[Promise[Book]] {
     def compare(a: Promise[Book], b: Promise[Book]) = {
@@ -240,10 +241,14 @@ private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends
   }
 
   def makeBook(isbn: String): Option[Book] = {
-    println(Thread.currentThread().getName + " - looking up book: " + isbn)
+    //println(Thread.currentThread().getName + " - looking up book: " + isbn)
     val xml = amazonClient.findByIsbn(isbn)
     try {
-      Book.fromAmazonXml(isbn, xml)
+      val bookOption = Book.fromAmazonXml(isbn, xml)
+      //bookOption match {
+      //  case Some(book) => println (Book.BookFormat.writes(book))
+      //}
+      bookOption
     } catch {
       case nfe: NumberFormatException => {
         throw nfe
