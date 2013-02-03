@@ -4,6 +4,7 @@ import xml.{NodeSeq, Elem}
 import play.api.libs.json._
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
+import com.mongodb.casbah.Imports._
 
 sealed trait Book extends Ordered[Book] {
 

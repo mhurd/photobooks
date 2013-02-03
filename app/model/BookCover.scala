@@ -37,7 +37,13 @@ object BookCover {
 
   implicit object BookCoverFormat extends Format[BookCover] {
 
-    def reads(json: JsValue): BookCover = KnownBookCover((json \ "url").as[String])
+    def reads(json: JsValue): BookCover = {
+      val url = (json \ "url").as[String]
+      url match {
+        case "Unknown" => UnknownBookCover()
+        case _ => KnownBookCover(url)
+      }
+    }
 
     def writes(bookCover: BookCover): JsValue = JsObject(List(
       "url" -> JsString(bookCover.url)))

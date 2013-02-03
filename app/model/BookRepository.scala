@@ -9,6 +9,14 @@ import java.util.concurrent.TimeUnit
 import play.api.libs.concurrent._
 import akka.routing.RoundRobinRouter
 
+import com.mongodb.casbah.Imports._
+import com.mongodb.ServerAddress
+import play.api.libs.json.Json
+import play.api.cache.Cache
+
+import play.api.Play.current
+import java.net.InetAddress
+
 trait BookRepository {
 
   def getBooks(): Promise[List[Book]]
@@ -19,17 +27,93 @@ trait BookRepository {
 
 object BookRepository {
 
+  def apply(): BookRepository = MongoDbBookRepository()
+
+  def apply(amazonClient: AmazonClient): BookRepository = AmazonBookRepository(amazonClient)
+
+}
+
+private class MongoDbBookRepository(db : MongoDB) extends BookRepository {
+
+  val photobooksDb = db
+  val booksCollection = photobooksDb("books")
+
+  def getBooks(): Promise[List[Book]] = {
+    val p = Promise[List[Book]]
+    val books = Cache.getOrElse[List[Book]]("books", 30) {
+      val dbBooks = for {
+        bookJson <- booksCollection.find().sort(Map("title" -> 1))
+      } yield {
+        Book.BookFormat.reads(Json.parse(bookJson.toString))
+      }
+      dbBooks.toList
+    }
+    p.redeem(books)
+    p
+  }
+
+  def getBook(isbn: String): Promise[List[Book]] = {
+    val q = MongoDBObject("isbn" -> isbn)
+    val p = Promise[List[Book]]
+    val books = Cache.getOrElse[List[Book]](isbn, 30) {
+      val dbBooks = for {
+        bookJson <- booksCollection.find(q)
+      } yield {
+        Book.BookFormat.reads(Json.parse(bookJson.toString))
+      }
+      dbBooks.toList
+    }
+    p.redeem(books)
+    p
+  }
+
+}
+
+object MongoDbBookRepository {
+
+  def getServerAddresses(addresses: String): List[ServerAddress] = {
+    addresses match {
+      case "" => throw new IllegalArgumentException("No MongoDB Servers configured!")
+      case s => {
+        val servers = s.split(",")
+        (for {
+          (host, port) <- servers.map(_.split(":").head).zip(servers.map(_.split(":").tail.head))
+        } yield {
+          new ServerAddress(host, port.toInt)
+        }).toList
+      }
+    }
+  }
+
+  // property is in the form host:port,host:port
+  private val replicaSetServers = getServerAddresses(Play.current.configuration.getString("mongodb.servers").get)
+  private val username = Play.current.configuration.getString("mongodb.username").get
+  private val password = Play.current.configuration.getString("mongodb.password").get
+
+  println("Connecting to MongoDB servers: " + replicaSetServers)
+  val client = MongoConnection(replicaSetServers)
+
+  val photobooksDb = client("photobooks") // the name of the database
+  println("Authenticating as user: " + username)
+  photobooksDb.authenticate(username, password)
+
+  def apply(): BookRepository = new MongoDbBookRepository(photobooksDb)
+
+}
+
+object AmazonBookRepository {
+
   private val accessKey = Play.current.configuration.getString("amazon.key.access").get
   private val secretKey = Play.current.configuration.getString("amazon.key.secret").get
   private val associateTag = Play.current.configuration.getString("amazon.associate.tag").get
 
-  def apply(): BookRepository = new BookRepositoryImpl(AmazonClient(accessKey, secretKey, associateTag))
+  def apply(): BookRepository  = new AmazonBookRepository(AmazonClient(accessKey, secretKey, associateTag))
 
-  def apply(amazonClient: AmazonClient): BookRepository = new BookRepositoryImpl(amazonClient)
+  def apply(amazonClient: AmazonClient): BookRepository = new AmazonBookRepository(amazonClient)
 
 }
 
-private class BookRepositoryImpl(private val amazonClient: AmazonClient) extends BookRepository {
+private class AmazonBookRepository(private val amazonClient: AmazonClient) extends BookRepository {
 
   private val isbns =
     List("0199757143",

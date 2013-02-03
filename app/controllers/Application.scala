@@ -14,7 +14,7 @@ object Application extends Controller {
     val start = System.currentTimeMillis()
     Async {
       bookRepository.getBooks() map (res => {
-        println("total time: " + (System.currentTimeMillis() - start)/1000 + " seconds")
+        println("total time to get book index: " + (System.currentTimeMillis() - start)/1000 + " seconds")
         Ok(views.html.index(res.filter(book => book.valid), googleAnalyticsCode))
       })
     }
