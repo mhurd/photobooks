@@ -30,15 +30,15 @@ object Price {
 
   implicit object PriceFormat extends Format[Option[Price]] {
 
-    def reads(json: JsValue): Option[Price] =
+    def reads(json: JsValue): JsResult[Option[Price]] =
       json match {
-        case JsUndefined(_) => None
-        case JsNull => None
+        case JsUndefined(_) => JsSuccess(None)
+        case JsNull => JsSuccess(None)
         case _ => {
-          Some(PriceImpl(
+          JsSuccess(Some(PriceImpl(
             (json \ "amount").as[Int],
             (json \ "currencyCode").as[String],
-            (json \ "formattedPrice").as[String]))
+            (json \ "formattedPrice").as[String])))
         }
       }
 

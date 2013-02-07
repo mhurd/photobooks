@@ -4,7 +4,6 @@ import xml.{NodeSeq, Elem}
 import play.api.libs.json._
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
-import com.mongodb.casbah.Imports._
 
 sealed trait Book extends Ordered[Book] {
 
@@ -80,7 +79,7 @@ private case class BookImpl(isbn: Option[String],
 
   def displayableAuthors: String =
     authors match {
-      case None =>  "Not set"
+      case None => "Not set"
       case Some(_) => authors.get
     }
 
@@ -92,32 +91,32 @@ private case class BookImpl(isbn: Option[String],
 
   def displayableLowestNewPrice: String =
     offerSummary match {
-      case None =>  "None found"
-        case Some(offerSummaryMatch) => {
-          offerSummaryMatch.lowestNewPrice match {
-            case None => "None found"
-            case Some(price) => price.formattedPrice
-          }
+      case None => "None found"
+      case Some(offerSummaryMatch) => {
+        offerSummaryMatch.lowestNewPrice match {
+          case None => "None found"
+          case Some(price) => price.formattedPrice
         }
+      }
     }
 
   def displayableLowestUsedPrice: String =
     offerSummary match {
-          case None =>  "None found"
-            case Some(offerSummaryMatch) => {
-              offerSummaryMatch.lowestUsedPrice match {
-                case None => "None found"
-                case Some(price) => price.formattedPrice
-              }
-            }
+      case None => "None found"
+      case Some(offerSummaryMatch) => {
+        offerSummaryMatch.lowestUsedPrice match {
+          case None => "None found"
+          case Some(price) => price.formattedPrice
         }
+      }
+    }
 }
 
 object Book {
 
   implicit object BookFormat extends Format[Book] {
 
-    def reads(json: JsValue): Book = BookImpl(
+    def reads(json: JsValue): JsResult[Book] = JsSuccess(BookImpl(
       (json \ "isbn").as[Option[String]],
       (json \ "ean").as[Option[String]],
       (json \ "title").as[String],
@@ -126,9 +125,9 @@ object Book {
       (json \ "numberOfPages").as[Option[String]],
       (json \ "publicationDate").as[Option[String]],
       (json \ "publisher").as[Option[String]],
-      BookCover.BookCoverFormat.reads(json \ "bookCover"),
-      Price.PriceFormat.reads(json \ "listPrice"),
-      OfferSummary.OfferSummaryFormat.reads(json \ "offerSummary"))
+      BookCover.BookCoverFormat.reads(json \ "bookCover").get,
+      Price.PriceFormat.reads(json \ "listPrice").get,
+      OfferSummary.OfferSummaryFormat.reads(json \ "offerSummary").get))
 
     def writes(book: Book): JsValue = JsObject(List(
       "isbn" -> Json.toJson(book.isbn),

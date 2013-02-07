@@ -55,15 +55,15 @@ object OfferSummary {
 
   implicit object OfferSummaryFormat extends Format[Option[OfferSummary]] {
 
-    def reads(json: JsValue): Option[OfferSummary] =
+    def reads(json: JsValue): JsResult[Option[OfferSummary]] =
       json match {
-        case JsUndefined(_) => None
-        case JsNull => None
+        case JsUndefined(_) => JsSuccess(None)
+        case JsNull => JsSuccess(None)
         case _ => {
-          Some(OfferSummaryImpl(Price.PriceFormat.reads(json \ "lowestUsedPrice"),
-            Price.PriceFormat.reads(json \ "lowestNewPrice"),
+          JsSuccess(Some(OfferSummaryImpl(Price.PriceFormat.reads(json \ "lowestUsedPrice").get,
+            Price.PriceFormat.reads(json \ "lowestNewPrice").get,
             (json \ "totalUsed").as[String],
-            (json \ "totalNew").as[String]))
+            (json \ "totalNew").as[String])))
         }
       }
 

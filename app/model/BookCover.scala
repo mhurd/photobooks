@@ -1,7 +1,9 @@
 package model
 
 import xml.{NodeSeq, Elem}
-import play.api.libs.json.{JsString, JsObject, JsValue, Format}
+import play.api.libs.json._
+import play.api.libs.json.JsObject
+import play.api.libs.json.JsString
 
 sealed trait BookCover {
   def url: String
@@ -37,11 +39,11 @@ object BookCover {
 
   implicit object BookCoverFormat extends Format[BookCover] {
 
-    def reads(json: JsValue): BookCover = {
+    def reads(json: JsValue): JsResult[BookCover] = {
       val url = (json \ "url").as[String]
       url match {
-        case "Unknown" => UnknownBookCover()
-        case _ => KnownBookCover(url)
+        case "Unknown" => JsSuccess(UnknownBookCover())
+        case _ => JsSuccess(KnownBookCover(url))
       }
     }
 

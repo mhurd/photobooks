@@ -4,6 +4,8 @@ import play.api.mvc._
 import model.BookRepository
 import play.api.Play
 
+import play.api.libs.concurrent.Execution.Implicits._
+
 object Application extends Controller {
 
   val bookRepository = BookRepository()
@@ -13,8 +15,8 @@ object Application extends Controller {
   def index = Action {
     val start = System.currentTimeMillis()
     Async {
-      bookRepository.getBooks() map (res => {
-        println("total time to get book index: " + (System.currentTimeMillis() - start)/1000 + " seconds")
+      bookRepository.getBooks().map(res => {
+        println("total time to get book index: " + (System.currentTimeMillis() - start) / 1000 + " seconds")
         Ok(views.html.index(res.filter(book => book.valid), googleAnalyticsCode))
       })
     }

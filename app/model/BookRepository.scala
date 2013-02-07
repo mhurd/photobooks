@@ -6,7 +6,6 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
-import play.api.libs.concurrent._
 import akka.routing.RoundRobinRouter
 
 import com.mongodb.casbah.Imports._
@@ -15,13 +14,16 @@ import play.api.libs.json.Json
 import play.api.cache.Cache
 
 import play.api.Play.current
-import java.net.InetAddress
+import concurrent.{Await, Future}
+import concurrent.duration._
+
+import play.api.libs.concurrent.Execution.Implicits._
 
 trait BookRepository {
 
-  def getBooks(): Promise[List[Book]]
+  def getBooks(): Future[List[Book]]
 
-  def getBook(isbn: String): Promise[List[Book]]
+  def getBook(isbn: String): Future[List[Book]]
 
 }
 
@@ -33,38 +35,34 @@ object BookRepository {
 
 }
 
-private class MongoDbBookRepository(db : MongoDB) extends BookRepository {
+private class MongoDbBookRepository(db: MongoDB) extends BookRepository {
 
   val photobooksDb = db
   val booksCollection = photobooksDb("books")
 
-  def getBooks(): Promise[List[Book]] = {
-    val p = Promise[List[Book]]
+  def getBooks(): Future[List[Book]] = {
     val books = Cache.getOrElse[List[Book]]("books", 30) {
       val dbBooks = for {
         bookJson <- booksCollection.find().sort(Map("title" -> 1))
       } yield {
-        Book.BookFormat.reads(Json.parse(bookJson.toString))
+        Book.BookFormat.reads(Json.parse(bookJson.toString)).get
       }
       dbBooks.toList
     }
-    p.redeem(books)
-    p
+    Future(books)
   }
 
-  def getBook(isbn: String): Promise[List[Book]] = {
+  def getBook(isbn: String): Future[List[Book]] = {
     val q = MongoDBObject("isbn" -> isbn)
-    val p = Promise[List[Book]]
     val books = Cache.getOrElse[List[Book]](isbn, 30) {
       val dbBooks = for {
         bookJson <- booksCollection.find(q)
       } yield {
-        Book.BookFormat.reads(Json.parse(bookJson.toString))
+        Book.BookFormat.reads(Json.parse(bookJson.toString)).get
       }
       dbBooks.toList
     }
-    p.redeem(books)
-    p
+    Future(books)
   }
 
 }
@@ -77,7 +75,7 @@ object MongoDbBookRepository {
       case s => {
         val servers = s.split(",")
         (for {
-          (host, port) <- servers.map(_.split(":").head).zip(servers.map(_.split(":").tail.head))
+          (host, port) <- servers.map(_.split(":")(0)).zip(servers.map(_.split(":")(1)))
         } yield {
           new ServerAddress(host, port.toInt)
         }).toList
@@ -107,7 +105,7 @@ object AmazonBookRepository {
   private val secretKey = Play.current.configuration.getString("amazon.key.secret").get
   private val associateTag = Play.current.configuration.getString("amazon.associate.tag").get
 
-  def apply(): BookRepository  = new AmazonBookRepository(AmazonClient(accessKey, secretKey, associateTag))
+  def apply(): BookRepository = new AmazonBookRepository(AmazonClient(accessKey, secretKey, associateTag))
 
   def apply(amazonClient: AmazonClient): BookRepository = new AmazonBookRepository(amazonClient)
 
@@ -270,9 +268,9 @@ private class AmazonBookRepository(private val amazonClient: AmazonClient) exten
       "0870700944",
       "190789327X")
 
-  object BookOrdering extends Ordering[Promise[Book]] {
-    def compare(a: Promise[Book], b: Promise[Book]) = {
-      a.await(60, TimeUnit.SECONDS).get.title compare b.await(60, TimeUnit.SECONDS).get.title
+  object BookOrdering extends Ordering[Future[Book]] {
+    def compare(a: Future[Book], b: Future[Book]) = {
+      Await.result(a, 30 seconds).title compare Await.result(b, 30 seconds).title
     }
 
   }
@@ -317,10 +315,10 @@ private class AmazonBookRepository(private val amazonClient: AmazonClient) exten
 
   lazy private val books = makeBooks(isbns)
 
-  private def makeBooks(isbns: List[String]): Promise[List[Book]] = {
+  private def makeBooks(isbns: List[String]): Future[List[Book]] = {
     implicit val timeout = Timeout(60, TimeUnit.SECONDS)
-    Promise.sequence(isbns.map(isbn => {
-      (bookMakerRouter ? MakeBookFromISBN(isbn)).mapTo[Book].asPromise
+    Future.sequence(isbns.map(isbn => {
+      (bookMakerRouter ? MakeBookFromISBN(isbn)).mapTo[Book]
     }).sorted(BookOrdering))
   }
 
@@ -340,11 +338,11 @@ private class AmazonBookRepository(private val amazonClient: AmazonClient) exten
     }
   }
 
-  def getBooks(): Promise[List[Book]] = {
+  def getBooks(): Future[List[Book]] = {
     books
   }
 
-  def getBook(isbn: String): Promise[List[Book]] = {
+  def getBook(isbn: String): Future[List[Book]] = {
     makeBooks(List(isbn))
   }
 
