@@ -4,9 +4,12 @@ import play.api.Play
 import amazon.AmazonClient
 import concurrent.{Await, Future}
 import akka.actor.{Props, ActorLogging, Actor, ActorSystem}
+import akka.pattern.ask
 import akka.routing.RoundRobinRouter
 import akka.util.Timeout
 import java.util.concurrent.TimeUnit
+import concurrent.duration._
+import concurrent.ExecutionContext.Implicits.global
 
 class AmazonBookRepository extends BookRepositoryImpl {
 

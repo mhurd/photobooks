@@ -5,6 +5,8 @@ import com.mongodb.casbah.Imports._
 import concurrent.Future
 import play.api.cache.Cache
 import play.api.libs.json.Json
+import play.api.Play.current
+import concurrent.ExecutionContext.Implicits.global
 
 class MongoDbBookRepository extends BookRepositoryImpl {
 
