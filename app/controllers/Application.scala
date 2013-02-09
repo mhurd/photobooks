@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc._
-import model.{BookRepositoryImpl, MongoDbBookRepository, BookRepository}
+import model.{AmazonBookRepository, BookRepositoryImpl, MongoDbBookRepository, BookRepository}
 import play.api.Play
 
 import play.api.libs.concurrent.Execution.Implicits._

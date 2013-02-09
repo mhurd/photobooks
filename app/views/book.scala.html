@@ -19,12 +19,13 @@
                 </td>
                 <td align="left">
                     <dl class="dl-horizontal">
-                        <dt>Author(s):</dt> <dd>@book.displayableAuthors</dd>
-                        <dt>Publisher:</dt> <dd>@book.publisher</dd>
-                        <dt>Publication Date:</dt> <dd>@book.publicationDate</dd>
-                        <dt>Binding:</dt> <dd>@book.binding</dd>
-                        <dt>ISBN:</dt> <dd>@book.isbn</dd>
-                        <dt>EAN:</dt> <dd>@book.ean</dd>
+                        <dt>Author(s):</dt> <dd>@book.displayableStringOption(book.authors)</dd>
+                        <dt>Publisher:</dt> <dd>@book.displayableStringOption(book.publisher)</dd>
+                        <dt>Publication Date:</dt> <dd>@book.displayableStringOption(book.publicationDate)</dd>
+                        <dt>Binding:</dt> <dd>@book.displayableStringOption(book.binding)</dd>
+                        <dt>Edition:</dt> <dd>@book.displayableStringOption(book.edition)</dd>
+                        <dt>ISBN:</dt> <dd>@book.displayableStringOption(book.isbn)</dd>
+                        <dt>EAN:</dt> <dd>@book.displayableStringOption(book.ean)</dd>
                         <dt>List price:</dt> <dd>@book.displayableListPrice</dd>
                         <dt>Lowest New Price:</dt> <dd>@book.displayableLowestNewPrice</dd>
                         <dt>Lowest Used Price:</dt> <dd>@book.displayableLowestUsedPrice</dd>

@@ -17,6 +17,8 @@ sealed trait Book extends Ordered[Book] {
 
   def binding: Option[String]
 
+  def edition: Option[String]
+
   def numberOfPages: Option[String]
 
   def publicationDate: Option[String]
@@ -29,7 +31,7 @@ sealed trait Book extends Ordered[Book] {
 
   def offerSummary: Option[OfferSummary]
 
-  def displayableAuthors: String
+  def displayableStringOption(option: Option[String]): String
 
   def displayableListPrice: String
 
@@ -45,6 +47,7 @@ sealed trait Book extends Ordered[Book] {
       "PUBLISHER: " + publisher + "\n" +
       "PUBLICATION DATE: " + publicationDate + "\n" +
       "BINDING: " + binding + "\n" +
+      "EDITION:" + edition + "\n" +
       "PAGES: " + numberOfPages + "\n" +
       "LIST PRICE: " + listPrice + "\n" +
       "OFFER SUMMARY: \n\t" + offerSummary + "\n" +
@@ -64,6 +67,7 @@ private case class BookImpl(isbn: Option[String],
                             title: String,
                             authors: Option[String],
                             binding: Option[String],
+                            edition: Option[String],
                             numberOfPages: Option[String],
                             publicationDate: Option[String],
                             publisher: Option[String],
@@ -73,28 +77,30 @@ private case class BookImpl(isbn: Option[String],
 
   def valid: Boolean = true
 
+  def noData = "- no data -"
+
+  def displayableStringOption(option: Option[String]): String =
+    option match {
+      case None => noData
+      case Some(text) => text
+    }
+
   def bookCover(size: Int): BookCover = {
     bookCover.size(size)
   }
 
-  def displayableAuthors: String =
-    authors match {
-      case None => "Not set"
-      case Some(_) => authors.get
-    }
-
   def displayableListPrice: String =
     listPrice match {
-      case None => "None found"
+      case None => noData
       case Some(listPriceMatch) => listPriceMatch.formattedPrice
     }
 
   def displayableLowestNewPrice: String =
     offerSummary match {
-      case None => "None found"
+      case None => noData
       case Some(offerSummaryMatch) => {
         offerSummaryMatch.lowestNewPrice match {
-          case None => "None found"
+          case None => noData
           case Some(price) => price.formattedPrice
         }
       }
@@ -102,10 +108,10 @@ private case class BookImpl(isbn: Option[String],
 
   def displayableLowestUsedPrice: String =
     offerSummary match {
-      case None => "None found"
+      case None => noData
       case Some(offerSummaryMatch) => {
         offerSummaryMatch.lowestUsedPrice match {
-          case None => "None found"
+          case None => noData
           case Some(price) => price.formattedPrice
         }
       }
@@ -122,6 +128,7 @@ object Book {
       (json \ "title").as[String],
       (json \ "authors").as[Option[String]],
       (json \ "binding").as[Option[String]],
+      (json \ "edition").as[Option[String]],
       (json \ "numberOfPages").as[Option[String]],
       (json \ "publicationDate").as[Option[String]],
       (json \ "publisher").as[Option[String]],
@@ -135,13 +142,13 @@ object Book {
       "title" -> JsString(book.title),
       "authors" -> Json.toJson(book.authors),
       "binding" -> Json.toJson(book.binding),
+      "edition" -> Json.toJson(book.edition),
       "numberOfPages" -> Json.toJson(book.numberOfPages),
       "publicationDate" -> Json.toJson(book.publicationDate),
       "publisher" -> Json.toJson(book.publisher),
       "bookCover" -> BookCover.BookCoverFormat.writes(book.bookCover),
       "listPrice" -> Price.PriceFormat.writes(book.listPrice),
       "offerSummary" -> OfferSummary.OfferSummaryFormat.writes(book.offerSummary)))
-
   }
 
   private def getOptionText(node: NodeSeq): Option[String] =
@@ -165,6 +172,7 @@ object Book {
           itemAttributesNode \ "Title" text,
           authors,
           getOptionText(itemAttributesNode \ "Binding"),
+          getOptionText(itemAttributesNode \ "Edition"),
           getOptionText(itemAttributesNode \ "NumberOfPages"),
           getOptionText(itemAttributesNode \ "PublicationDate"),
           getOptionText(itemAttributesNode \ "Publisher"),
