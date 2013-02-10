@@ -22,6 +22,8 @@ trait AmazonClient {
 
   def findByIsbn(isbn: String): Elem
 
+  def findOfferSummaryByIsbn(isbn: String): Elem
+
 }
 
 object AmazonClient {
@@ -137,6 +139,10 @@ private class AmazonImpl(private val accessKey: String, private val secretKey: S
 
   def findByIsbn(isbn: String): Elem = {
     find(SortedMap("Operation" -> "ItemLookup", "ItemId" -> isbn, "IdType" -> "ISBN"), DEFAULT_TIMEOUT, 0)
+  }
+
+  def findOfferSummaryByIsbn(isbn: String): Elem = {
+    find(SortedMap("ResponseGroup" -> "OfferSummary", "Operation" -> "ItemLookup", "ItemId" -> isbn, "IdType" -> "ISBN"), DEFAULT_TIMEOUT, 0)
   }
 
 }

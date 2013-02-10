@@ -13,7 +13,7 @@ object ApplicationBuild extends Build {
       "commons-codec" % "commons-codec" % "1.7",
       "joda-time" % "joda-time" % "2.0",
       "org.mongodb" %% "casbah" % "2.5.0",
-      "org.scalatest" %% "scalatest" % "1.9.1" % "test"
+      "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
     )
 
   val main = play.Project(appName, appVersion, appDependencies).settings(

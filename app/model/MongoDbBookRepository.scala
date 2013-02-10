@@ -10,6 +10,8 @@ import concurrent.ExecutionContext.Implicits.global
 
 class MongoDbBookRepository extends BookRepositoryImpl {
 
+  private val cacheExpiration = 30
+
   private def getServerAddresses(addresses: String): List[ServerAddress] = {
     addresses match {
       case "" => throw new IllegalArgumentException("No MongoDB Servers configured!")
@@ -39,7 +41,7 @@ class MongoDbBookRepository extends BookRepositoryImpl {
   val booksCollection = photobooksDb("books")
 
   def getBooks(): Future[List[Book]] = {
-    val books = Cache.getOrElse[List[Book]]("books", 30) {
+    val books = Cache.getOrElse[List[Book]]("books", cacheExpiration) {
       val dbBooks = for {
         bookJson <- booksCollection.find().sort(Map("title" -> 1))
       } yield {
@@ -52,7 +54,7 @@ class MongoDbBookRepository extends BookRepositoryImpl {
 
   def getBook(isbn: String): Future[List[Book]] = {
     val q = MongoDBObject("isbn" -> isbn)
-    val books = Cache.getOrElse[List[Book]](isbn, 30) {
+    val books = Cache.getOrElse[List[Book]](isbn, cacheExpiration) {
       val dbBooks = for {
         bookJson <- booksCollection.find(q)
       } yield {

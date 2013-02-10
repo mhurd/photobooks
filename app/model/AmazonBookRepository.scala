@@ -222,7 +222,7 @@ class AmazonBookRepository extends BookRepositoryImpl {
   lazy private val books = makeBooks(isbns)
 
   private def makeBooks(isbns: List[String]): Future[List[Book]] = {
-    implicit val timeout = Timeout(60, TimeUnit.SECONDS)
+    implicit val timeout = Timeout(30, TimeUnit.SECONDS)
     Future.sequence(isbns.map(isbn => {
       (bookMakerRouter ? MakeBookFromISBN(isbn)).mapTo[Book]
     }).sorted(BookOrdering))

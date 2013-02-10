@@ -15,18 +15,22 @@ object Application extends Controller {
   private val googleAnalyticsCode = Play.current.configuration.getString("google.analytics.code").get
 
   def index = Action {
-    val start = System.currentTimeMillis()
+    val start = System.nanoTime()
     Async {
       books.repository.getBooks().map(res => {
-        println("total time to get book index: " + (System.currentTimeMillis() - start) / 1000 + " seconds")
+        println("total time to get book index: " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
         Ok(views.html.index(res.filter(book => book.valid), googleAnalyticsCode))
       })
     }
   }
 
   def book(isbn: String) = Action {
+    val start = System.nanoTime()
     Async {
-      books.repository.getBook(isbn) map (res => Ok(views.html.book(res.head, googleAnalyticsCode)))
+      books.repository.getBook(isbn) map (res => {
+        println("total time to get book page: " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+        Ok(views.html.book(res.head, googleAnalyticsCode))
+      })
     }
   }
 
