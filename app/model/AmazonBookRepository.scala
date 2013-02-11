@@ -1,6 +1,6 @@
 package model
 
-import play.api.Play
+import play.api.{Logger, Play}
 import amazon.AmazonClient
 import concurrent.{Await, Future}
 import akka.actor.{Props, ActorLogging, Actor, ActorSystem}
@@ -184,14 +184,14 @@ class AmazonBookRepository extends BookRepositoryImpl {
   val akkaSystem = ActorSystem("PhotoBooksSystem")
 
   sys.addShutdownHook({
-    println("Shutting down akka...")
+    Logger.info("Shutting down akka...")
     akkaSystem.shutdown()
   })
 
   def numberOfBookMakers(): Int = {
     val parallelismCoefficient = 80 // 1..100, lower for CPU-bound, higher for IO-bound
     val number = Runtime.getRuntime().availableProcessors() * 100 / (100 - parallelismCoefficient)
-    println("Using " + number + " Book Makers...")
+    Logger.info("Using " + number + " Book Maker actors...")
     number
   }
 
@@ -229,14 +229,14 @@ class AmazonBookRepository extends BookRepositoryImpl {
   }
 
   def makeBook(isbn: String): Option[Book] = {
-    //println(Thread.currentThread().getName + " - looking up book: " + isbn)
+    Logger.debug(Thread.currentThread().getName + " - looking up book: " + isbn)
     val xml = amazonClient.findByIsbn(isbn)
     try {
       val bookOption = Book.fromAmazonXml(isbn, xml)
-      bookOption match {
-        case Some(book) => println (Book.BookFormat.writes(book))
-        case None => println("")
-      }
+     // bookOption match {
+     //   case Some(book) => println (Book.BookFormat.writes(book))
+     //   case None => println("")
+     //}
       bookOption
     } catch {
       case nfe: NumberFormatException => {

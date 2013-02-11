@@ -1,6 +1,6 @@
 package model
 
-import play.api.Play
+import play.api.{Logger, Play}
 import com.mongodb.casbah.Imports._
 import concurrent.Future
 import play.api.cache.Cache
@@ -31,11 +31,11 @@ class MongoDbBookRepository extends BookRepositoryImpl {
   private val username = Play.current.configuration.getString("mongodb.username").get
   private val password = Play.current.configuration.getString("mongodb.password").get
 
-  println("Connecting to MongoDB servers: " + replicaSetServers)
+  Logger.info("Connecting to MongoDB servers: " + replicaSetServers)
   val client = MongoConnection(replicaSetServers)
 
   val photobooksDb = client("photobooks") // the name of the database
-  println("Authenticating as user: " + username)
+  Logger.info("Authenticating as user: " + username)
   photobooksDb.authenticate(username, password)
 
   val booksCollection = photobooksDb("books")

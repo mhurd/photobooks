@@ -4,6 +4,7 @@ import xml.{NodeSeq, Elem}
 import play.api.libs.json._
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
+import play.api.Logger
 
 sealed trait Book extends Ordered[Book] {
 
@@ -182,7 +183,7 @@ object Book {
         ))
       }
       case _ => {
-        println("Could not find book: " + isbn)
+        Logger.info("Could not find book: " + isbn)
         None
       }
     }
