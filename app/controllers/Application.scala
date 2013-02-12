@@ -30,8 +30,16 @@ object Application extends Controller {
     val start = System.nanoTime()
     Async {
       books.repository.getBook(isbn) map (res => {
-        Logger.debug(request.remoteAddress + " - total time to get book page: " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
-        Ok(views.html.book(res.head, googleAnalyticsCode))
+        res match {
+          case Nil => {
+            Logger.debug(request.remoteAddress + " - 404 not found for books/" + isbn)
+            NotFound
+          }
+          case head :: tail => {
+            Logger.debug(request.remoteAddress + " - total time to get books/" + isbn + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+            Ok(views.html.book(head, googleAnalyticsCode))
+          }
+        }
       })
     }
   }
