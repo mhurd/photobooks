@@ -233,10 +233,10 @@ class AmazonBookRepository extends BookRepositoryImpl {
     val xml = amazonClient.findByIsbn(isbn)
     try {
       val bookOption = Book.fromAmazonXml(isbn, xml)
-     // bookOption match {
-     //   case Some(book) => println (Book.BookFormat.writes(book))
-     //   case None => println("")
-     //}
+      // bookOption match {
+      //   case Some(book) => println (Book.BookFormat.writes(book))
+      //   case None => println("")
+      //}
       bookOption
     } catch {
       case nfe: NumberFormatException => {

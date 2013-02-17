@@ -4,36 +4,18 @@ import xml.{NodeSeq, Elem}
 import play.api.libs.json._
 import play.api.libs.json.JsObject
 
-sealed trait OfferSummary {
-  def lowestUsedPrice: Option[Price]
-
-  def lowestNewPrice: Option[Price]
-
-  def totalUsed: String
-
-  def totalNew: String
-
-  override def toString: String = {
-    "LOWEST USED PRICE: " + lowestUsedPrice + ", " +
-      "LOWEST NEW PRICE: " + lowestNewPrice + ", " +
-      "TOTAL USED: " + totalUsed + ", " +
-      "TOTAL NEW: " + totalNew
-  }
-
-}
-
-private case class OfferSummaryImpl(
-                                     lowestUsedPrice: Option[Price],
-                                     lowestNewPrice: Option[Price],
-                                     totalUsed: String,
-                                     totalNew: String
-                                     ) extends OfferSummary {
+case class OfferSummary(
+                         lowestUsedPrice: Option[Price],
+                         lowestNewPrice: Option[Price],
+                         totalUsed: String,
+                         totalNew: String
+                         ) {
 }
 
 object OfferSummary {
 
   private def realPrice(priceNode: NodeSeq): Price = {
-    PriceImpl(
+    Price(
       (priceNode \ "Amount" text) toInt,
       priceNode \ "CurrencyCode" text,
       priceNode \ "FormattedPrice" text)
@@ -60,7 +42,7 @@ object OfferSummary {
         case JsUndefined(_) => JsSuccess(None)
         case JsNull => JsSuccess(None)
         case _ => {
-          JsSuccess(Some(OfferSummaryImpl(Price.PriceFormat.reads(json \ "lowestUsedPrice").get,
+          JsSuccess(Some(OfferSummary(Price.PriceFormat.reads(json \ "lowestUsedPrice").get,
             Price.PriceFormat.reads(json \ "lowestNewPrice").get,
             (json \ "totalUsed").as[String],
             (json \ "totalNew").as[String])))
@@ -85,7 +67,7 @@ object OfferSummary {
     val offerSummaryNode = xml \ "Items" \ "Item" \ "OfferSummary"
     val totalUsed = (offerSummaryNode \ "TotalUsed").text
     val totalNew = (offerSummaryNode \ "TotalNew").text
-    Some(OfferSummaryImpl(
+    Some(OfferSummary(
       lowestUsedPrice(offerSummaryNode, totalUsed),
       lowestNewPrice(offerSummaryNode, totalNew),
       totalUsed,

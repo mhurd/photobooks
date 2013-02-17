@@ -3,10 +3,10 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+GET     /                           controllers.BookGetController.index
 
 # Book
-GET     /books/:isbn               controllers.Application.book(isbn: String)
+GET     /books/:isbn               controllers.BookGetController.book(isbn: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

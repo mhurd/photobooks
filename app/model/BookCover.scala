@@ -5,45 +5,33 @@ import play.api.libs.json._
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
 
-sealed trait BookCover {
-  def url: String
-
-  def size(size: Int): BookCover
-}
-
-private case class KnownBookCover(url: String) extends BookCover {
+case class BookCover(url: String = BookCover.unknownBookCoverUrl) {
 
   override def toString: String = {
     url
   }
 
   def size(size: Int): BookCover = {
-    KnownBookCover(url.replaceAll(".jpg", "._SL" + size + "_.jpg"))
+    val unknownCover = BookCover.unknownBookCoverUrl
+    url match {
+      case `unknownCover` => this
+      case _ => BookCover(url.replaceAll(".jpg", "._SL" + size + "_.jpg"))
+    }
   }
-
-}
-
-private case class UnknownBookCover() extends BookCover {
-
-  def url: String = "Unknown"
-
-  override def toString: String = {
-    "/assets/images/no-image.jpg"
-  }
-
-  def size(size: Int): BookCover = this
 
 }
 
 object BookCover {
+
+  val unknownBookCoverUrl = "/assets/images/no-image.jpg"
 
   implicit object BookCoverFormat extends Format[BookCover] {
 
     def reads(json: JsValue): JsResult[BookCover] = {
       val url = (json \ "url").as[String]
       url match {
-        case "Unknown" => JsSuccess(UnknownBookCover())
-        case _ => JsSuccess(KnownBookCover(url))
+        case "Unknown" => JsSuccess(BookCover())
+        case _ => JsSuccess(BookCover(url))
       }
     }
 
@@ -54,8 +42,8 @@ object BookCover {
 
   private def bookCovers(largeImageNode: NodeSeq): BookCover = {
     largeImageNode.size match {
-      case 0 => UnknownBookCover()
-      case _ => KnownBookCover(largeImageNode \ "URL" text)
+      case 0 => BookCover()
+      case _ => BookCover(largeImageNode \ "URL" text)
     }
   }
 

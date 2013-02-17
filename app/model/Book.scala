@@ -6,75 +6,18 @@ import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
 import play.api.Logger
 
-sealed trait Book extends Ordered[Book] {
-
-  def isbn: Option[String]
-
-  def ean: Option[String]
-
-  def title: String
-
-  def authors: Option[String]
-
-  def binding: Option[String]
-
-  def edition: Option[String]
-
-  def numberOfPages: Option[String]
-
-  def publicationDate: Option[String]
-
-  def publisher: Option[String]
-
-  def bookCover: BookCover
-
-  def listPrice: Option[Price]
-
-  def offerSummary: Option[OfferSummary]
-
-  def displayableStringOption(option: Option[String]): String
-
-  def displayableListPrice: String
-
-  def displayableLowestNewPrice: String
-
-  def displayableLowestUsedPrice: String
-
-  override def toString: String = {
-    "TITLE: " + title + "\n" +
-      "AUTHORS: " + authors + "\n" +
-      "ISBN: " + isbn + "\n" +
-      "EAN: " + ean + "\n" +
-      "PUBLISHER: " + publisher + "\n" +
-      "PUBLICATION DATE: " + publicationDate + "\n" +
-      "BINDING: " + binding + "\n" +
-      "EDITION:" + edition + "\n" +
-      "PAGES: " + numberOfPages + "\n" +
-      "LIST PRICE: " + listPrice + "\n" +
-      "OFFER SUMMARY: \n\t" + offerSummary + "\n" +
-      "COVER: \n\t" + bookCover + "\n"
-  }
-
-  def valid: Boolean
-
-  def bookCover(size: Int): BookCover
-
-  def compare(other: Book) = title compare other.title
-
-}
-
-private case class BookImpl(isbn: Option[String],
-                            ean: Option[String],
-                            title: String,
-                            authors: Option[String],
-                            binding: Option[String],
-                            edition: Option[String],
-                            numberOfPages: Option[String],
-                            publicationDate: Option[String],
-                            publisher: Option[String],
-                            bookCover: BookCover,
-                            listPrice: Option[Price],
-                            offerSummary: Option[OfferSummary]) extends Book {
+case class Book(isbn: Option[String],
+                ean: Option[String],
+                title: String,
+                authors: Option[String],
+                binding: Option[String],
+                edition: Option[String],
+                numberOfPages: Option[String],
+                publicationDate: Option[String],
+                publisher: Option[String],
+                bookCover: BookCover,
+                listPrice: Option[Price],
+                offerSummary: Option[OfferSummary]) {
 
   def valid: Boolean = true
 
@@ -117,13 +60,16 @@ private case class BookImpl(isbn: Option[String],
         }
       }
     }
+
+  override def toString = Book.BookFormat.writes(this).toString()
+
 }
 
 object Book {
 
   implicit object BookFormat extends Format[Book] {
 
-    def reads(json: JsValue): JsResult[Book] = JsSuccess(BookImpl(
+    def reads(json: JsValue): JsResult[Book] = JsSuccess(Book(
       (json \ "isbn").as[Option[String]],
       (json \ "ean").as[Option[String]],
       (json \ "title").as[String],
@@ -167,7 +113,7 @@ object Book {
           case "" => None
           case _ => Some(authorsString)
         }
-        Some(new BookImpl(
+        Some(new Book(
           getOptionText(itemAttributesNode \ "ISBN"),
           getOptionText(itemAttributesNode \ "EAN"),
           itemAttributesNode \ "Title" text,

@@ -6,7 +6,7 @@ import play.api.{Logger, Play}
 
 import play.api.libs.concurrent.Execution.Implicits._
 
-object Application extends Controller {
+object BookGetController extends Controller {
 
   val books = new BookRepository {
     val repository: BookRepositoryImpl = new MongoDbBookRepository()
