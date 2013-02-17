@@ -1,0 +1,31 @@
+@(bookForm: Form[model.Book], googleAnalyticsCode: String)
+
+@import helper.twitterBootstrap._
+
+@main("Editing " + bookForm("title").value.get, googleAnalyticsCode){
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/book.css")" />
+}{
+
+    @helper.form(action = routes.BookEditController.submit(bookForm("isbn").value.get)) {
+
+        @helper.inputText(bookForm("isbn"))
+
+        @helper.inputText(bookForm("ean"))
+
+        @helper.inputText(bookForm("title"))
+
+        @helper.inputText(bookForm("authors"))
+
+        @helper.inputText(bookForm("binding"))
+
+        @helper.inputText(bookForm("edition"))
+
+        @helper.inputText(bookForm("numberOfPages"))
+
+        @helper.inputText(bookForm("publicationDate"))
+
+        @helper.inputText(bookForm("publisher"))
+
+    }
+
+}

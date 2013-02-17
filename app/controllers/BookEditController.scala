@@ -1,13 +1,22 @@
 package controllers
 
-import play.api.data._
+import play.api.mvc.Results.{Async, NotFound, Ok}
+import play.api.mvc.Action
+import model._
+import play.api.{Play, Logger}
+
+import play.api.data.Form
 import play.api.data.Forms._
-import model.BookCover
-import model.Price
-import model.Book
-import model.OfferSummary
+
+import play.api.libs.concurrent.Execution.Implicits._
 
 object BookEditController {
+
+  val books = new BookRepository {
+      val repository: BookRepositoryImpl = new MongoDbBookRepository()
+    }
+
+  private val googleAnalyticsCode = Play.current.configuration.getString("google.analytics.code").get
 
   val bookCoverMapping = mapping(
     "url" -> text
@@ -42,5 +51,32 @@ object BookEditController {
       "offerSummary" -> optional(offerSummaryMapping)
     )(Book.apply)(Book.unapply)
   )
+
+  def submit(isbn: String) = Action { implicit request =>
+    bookForm.bindFromRequest.fold(
+        formWithErrors => Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode)),
+        value => Ok("created: " + value)
+      )
+    }
+
+  def editBook(isbn: String) = Action {
+    request =>
+    val start = System.nanoTime()
+    Async {
+      books.repository.getBook(isbn) map (res => {
+        res match {
+          case Nil => {
+            Logger.debug(request.remoteAddress + " - 404 not found for books/" + isbn)
+            NotFound
+          }
+          case head :: tail => {
+            Logger.debug(request.remoteAddress + " - total time to get books/" + isbn + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+            val filledForm = bookForm.fill(head)
+            Ok(views.html.bookEdit(filledForm, googleAnalyticsCode))
+          }
+        }
+      })
+    }
+  }
 
 }
