@@ -4,3 +4,32 @@
     font-size: 14px;
     text-align: center;
 }
+
+.clearfix label {
+    width: 400px;
+    margin: auto;
+    display: block;
+    font-family: 'Poiret One', cursive;
+    font-size: 16px;
+}
+
+.input {
+    width: 400px;
+    margin: auto;
+    display: block;
+}
+
+.input input {
+    width: 400px;
+}
+
+.input textarea {
+    width: 400px;
+}
+
+.book-edit-button {
+    width: 400px;
+    margin: auto;
+    display: block;
+}
+

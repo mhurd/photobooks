@@ -53,10 +53,18 @@ object BookEditController {
   )
 
   def submit(isbn: String) = Action { implicit request =>
+    Logger.debug("Submitted " + isbn)
     bookForm.bindFromRequest.fold(
-        formWithErrors => Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode)),
+        formWithErrors => {
+          Logger.debug("Form with errors: " + isbn)
+          Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode))
+        },
         value => Ok("created: " + value)
       )
+    }
+
+  def createBook() = Action {
+      Ok(views.html.bookEdit(bookForm, googleAnalyticsCode))
     }
 
   def editBook(isbn: String) = Action {

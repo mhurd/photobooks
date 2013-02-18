@@ -6,26 +6,46 @@
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/book.css")" />
 }{
 
-    @helper.form(action = routes.BookEditController.submit(bookForm("isbn").value.get)) {
+    <div id="banner">
+         <h1>Edit Book</h1>
+    </div>
+    <div id="book">
+        @helper.form(action = routes.BookEditController.submit(bookForm("isbn").value.get)) {
 
-        @helper.inputText(bookForm("isbn"))
+            @bookForm.globalError.map { error =>
+                <span class="error">@error.message</span>
+            }
 
-        @helper.inputText(bookForm("ean"))
+            @helper.inputText(bookForm("isbn"))
 
-        @helper.inputText(bookForm("title"))
+            @helper.inputText(bookForm("ean"))
 
-        @helper.inputText(bookForm("authors"))
+            @helper.textarea(bookForm("title"), args = 'rows -> 4)
 
-        @helper.inputText(bookForm("binding"))
+            @helper.inputText(bookForm("authors"))
 
-        @helper.inputText(bookForm("edition"))
+            @helper.inputText(bookForm("binding"))
 
-        @helper.inputText(bookForm("numberOfPages"))
+            @helper.inputText(bookForm("edition"))
 
-        @helper.inputText(bookForm("publicationDate"))
+            @helper.inputText(bookForm("numberOfPages"))
 
-        @helper.inputText(bookForm("publisher"))
+            @helper.inputText(bookForm("publicationDate"))
 
-    }
+            @helper.inputText(bookForm("publisher"))
+
+            @helper.inputText(bookForm("bookCover.url"))
+
+            @helper.inputText(bookForm("listPrice.formattedPrice"))
+
+            @helper.inputText(bookForm("offerSummary.lowestUsedPrice.formattedPrice"))
+
+            <div class="book-edit-button">
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+
+        }
+
+    </div>
 
 }

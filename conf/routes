@@ -8,7 +8,7 @@ GET     /                           controllers.BookGetController.index
 # Book
 GET     /books/:isbn               controllers.BookGetController.book(isbn: String)
 GET     /books/edit/:isbn          controllers.BookEditController.editBook(isbn: String)
-PUT     /books/edit/:isbn          controllers.BookEditController.submit(isbn: String)
+POST     /books/edit/:isbn          controllers.BookEditController.submit(isbn: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
