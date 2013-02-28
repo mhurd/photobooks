@@ -7,6 +7,7 @@ import play.api.cache.Cache
 import play.api.libs.json.Json
 import play.api.Play.current
 import concurrent.ExecutionContext.Implicits.global
+import org.bson.types.ObjectId
 
 class MongoDbBookRepository extends BookRepositoryImpl {
 
@@ -52,17 +53,71 @@ class MongoDbBookRepository extends BookRepositoryImpl {
     Future(books)
   }
 
-  def getBook(isbn: String): Future[List[Book]] = {
+
+  def findBook(isbn: String): List[Book] = {
     val q = MongoDBObject("isbn" -> isbn)
-    val books = Cache.getOrElse[List[Book]](isbn, cacheExpiration) {
+    Cache.getOrElse[List[Book]](isbn, cacheExpiration) {
       val dbBooks = for {
         bookJson <- booksCollection.find(q)
       } yield {
+        Logger.debug("Getting book: " + bookJson.toString)
         Book.BookFormat.reads(Json.parse(bookJson.toString)).get
       }
       dbBooks.toList
     }
-    Future(books)
+  }
+
+  def getBook(isbn: String): Future[List[Book]] = {
+    Future(findBook(isbn))
+  }
+
+  def getOfferSummary(isbn: String): Future[Option[OfferSummary]] = {
+    findBook(isbn) match {
+      case Nil => Future(None)
+      case x::xs => Future(x.offerSummary)
+    }
+  }
+
+  def updateOfferSummary(book: Book, offerSummary: Option[OfferSummary]) {
+    val objId = new ObjectId(book.id.get)
+    val idObj = DBObject("_id" -> objId)
+    try {
+      offerSummary match {
+        case None => booksCollection.update(idObj, $unset(List("offerSummary")), false, false, WriteConcern.Safe)
+        case Some(os) => {
+          os.lowestUsedPrice match {
+            case None => booksCollection.update(idObj, $unset(List("offerSummary.lowestUsedPrice")), false, false, WriteConcern.Safe)
+            case Some(lp) => {
+              booksCollection.update(idObj, $set(List(
+                "offerSummary.lowestUsedPrice.amount" -> lp.amount,
+                "offerSummary.lowestUsedPrice.currencyCode" -> lp.currencyCode,
+                "offerSummary.lowestUsedPrice.formattedPrice" -> lp.formattedPrice
+              )), false, false, WriteConcern.Safe)
+            }
+          }
+          os.lowestNewPrice match {
+            case None => booksCollection.update(idObj, $unset(List("offerSummary.lowestNewPrice")), false, false, WriteConcern.Safe)
+            case Some(lp) => {
+              booksCollection.update(idObj, $set(List(
+                "offerSummary.lowestNewPrice.amount" -> lp.amount,
+                "offerSummary.lowestNewPrice.currencyCode" -> lp.currencyCode,
+                "offerSummary.lowestNewPrice.formattedPrice" -> lp.formattedPrice
+              )), false, false, WriteConcern.Safe)
+            }
+          }
+          booksCollection.update(idObj, $set(List(
+            "offerSummary.totalNew" -> os.totalNew,
+            "offerSummary.totalUsed" -> os.totalUsed
+          )), false, false, WriteConcern.Safe)
+          Logger.debug("Updated OfferSummary for '" + book.title + "' with " + os)
+        }
+      }
+    } catch {
+      case ex: Exception => {
+        Logger.error("Couldn't update OfferSummary for '" + book.title + "' with " + offerSummary, ex)
+      }
+    }
+
   }
 
 }

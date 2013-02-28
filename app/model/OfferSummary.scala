@@ -10,6 +10,23 @@ case class OfferSummary(
                          totalUsed: String,
                          totalNew: String
                          ) {
+
+  def displayableLowestUsedPrice: String =
+    lowestUsedPrice match {
+      case None => "none available, lowest price: ?"
+      case Some(price) => totalUsed + " used, lowest price: " + price.toString
+    }
+
+  def displayableLowestNewPrice: String =
+    lowestNewPrice match {
+      case None => "none available, lowest price: ?"
+      case Some(price) => totalNew + " new, lowest price: " + price.toString
+    }
+
+  override def toString: String = {
+    displayableLowestNewPrice + ", " + displayableLowestUsedPrice
+  }
+
 }
 
 object OfferSummary {

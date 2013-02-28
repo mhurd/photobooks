@@ -36,6 +36,7 @@
 
             @helper.inputText(bookForm("bookCover.url"))
 
+            <input type="hidden" value="@bookForm("id").value" name="id" id="id"/>
             <input type="hidden" value="@bookForm("listPrice.formattedPrice").value" name="listPrice.formattedPrice" id="listPrice_formattedPrice"/>
             <input type="hidden" value="@bookForm("listPrice.amount").value" name="listPrice.amount" id="listPrice_amount"/>
             <input type="hidden" value="@bookForm("listPrice.currencyCode").value" name="listPrice.currencyCode" id="listPrice_currencyCode"/>

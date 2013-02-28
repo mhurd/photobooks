@@ -37,6 +37,7 @@ object BookEditController {
 
   val bookForm = Form(
     mapping(
+      "id" -> optional(text),
       "isbn" -> optional(text),
       "ean" -> optional(text),
       "title" -> text,

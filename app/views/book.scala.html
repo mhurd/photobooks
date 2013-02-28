@@ -27,8 +27,8 @@
                         <dt>ISBN:</dt> <dd>@book.displayableStringOption(book.isbn)</dd>
                         <dt>EAN:</dt> <dd>@book.displayableStringOption(book.ean)</dd>
                         <dt>List price:</dt> <dd>@book.displayableListPrice</dd>
-                        <dt>Lowest New Price:</dt> <dd>@book.displayableLowestNewPrice</dd>
-                        <dt>Lowest Used Price:</dt> <dd>@book.displayableLowestUsedPrice</dd>
+                        <dt>Lowest New Price:</dt> <dd>@book.displayableLowestNewPrice <i>(@book.displayableTotalNew available)</i></dd>
+                        <dt>Lowest Used Price:</dt> <dd>@book.displayableLowestUsedPrice <i>(@book.displayableTotalUsed available)</i></dd>
                     </dl>
                 </td>
             </tr>

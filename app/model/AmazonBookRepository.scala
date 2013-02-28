@@ -11,13 +11,17 @@ import java.util.concurrent.TimeUnit
 import concurrent.duration._
 import concurrent.ExecutionContext.Implicits.global
 
-class AmazonBookRepository extends BookRepositoryImpl {
+class AmazonBookRepository {
 
   private val accessKey = Play.current.configuration.getString("amazon.key.access").get
   private val secretKey = Play.current.configuration.getString("amazon.key.secret").get
   private val associateTag = Play.current.configuration.getString("amazon.associate.tag").get
 
   private val amazonClient = AmazonClient(accessKey, secretKey, associateTag)
+
+  val bookRepository = new BookRepository {
+    val repository: BookRepositoryImpl = new MongoDbBookRepository()
+  }
 
   private val isbns =
     List("0199757143",
@@ -176,32 +180,30 @@ class AmazonBookRepository extends BookRepositoryImpl {
 
   object BookOrdering extends Ordering[Future[Book]] {
     def compare(a: Future[Book], b: Future[Book]) = {
-      Await.result(a, 30 seconds).title compare Await.result(b, 30 seconds).title
+      Await.result(a, 60 seconds).title compare Await.result(b, 60 seconds).title
     }
 
   }
 
   val akkaSystem = ActorSystem("PhotoBooksSystem")
 
-  sys.addShutdownHook({
-    Logger.info("Shutting down akka...")
-    akkaSystem.shutdown()
-  })
-
-  def numberOfBookMakers(): Int = {
+  def numberOfAmazonActors(): Int = {
     val parallelismCoefficient = 80 // 1..100, lower for CPU-bound, higher for IO-bound
     val number = Runtime.getRuntime().availableProcessors() * 100 / (100 - parallelismCoefficient)
     Logger.info("Using " + number + " Book Maker actors...")
     number
   }
 
-  sealed trait BookMessage
+  sealed trait AmazonMessage
 
-  case class MakeBookFromISBN(isbn: String) extends BookMessage
+  case class GetBookFromISBN(isbn: String) extends AmazonMessage
+  case class GetOfferSummaryFromISBN(isbn: String) extends AmazonMessage
+  case class UpdateOfferSummaries() extends AmazonMessage
+  case class UpdateOfferSummary(book: Book) extends AmazonMessage
 
-  class BookMakerActor extends Actor with ActorLogging {
+  class AmazonActor extends Actor with ActorLogging {
     def receive = {
-      case MakeBookFromISBN(isbn) ⇒ {
+      case GetBookFromISBN(isbn) ⇒ {
         try {
           val book = makeBook(isbn)
           if (book.isDefined) {
@@ -213,18 +215,67 @@ class AmazonBookRepository extends BookRepositoryImpl {
             throw e
         }
       }
+      case GetOfferSummaryFromISBN(isbn) ⇒ {
+        try {
+          val xml = amazonClient.findOfferSummaryByIsbn(isbn)
+          val offerSummary = OfferSummary.fromAmazonXml(xml)
+          if (offerSummary.isDefined) {
+            sender ! offerSummary
+          }
+        } catch {
+          case e: Exception ⇒
+            sender ! akka.actor.Status.Failure(e)
+            throw e
+        }
+      }
+      case UpdateOfferSummaries => {
+        val booksFuture = bookRepository.repository.getBooks()
+        booksFuture.onFailure {
+          case ex => Logger.error(ex.getMessage, ex)
+        }
+        booksFuture.onSuccess {
+          case xs => xs map (aBook => {
+            if (aBook.isbn.isDefined) (amazonActor ! UpdateOfferSummary(aBook))
+          })
+        }
+      }
+      case UpdateOfferSummary(book) => {
+        if (book.isbn.isDefined) {
+          val osFuture = getOfferSummary(book.isbn.get)
+          osFuture.onFailure {
+            case ex => Logger.error(ex.getMessage, ex)
+          }
+          osFuture.onSuccess {
+            case os => {
+              bookRepository.repository.updateOfferSummary(book, os)
+            }
+          }
+        }
+      }
     }
   }
 
-  val bookMakerRouter = akkaSystem.actorOf(
-    Props[BookMakerActor].withCreator(new BookMakerActor()).withRouter(RoundRobinRouter(numberOfBookMakers())), name = "bookMakerRouter")
+  val amazonActor = akkaSystem.actorOf(
+    Props[AmazonActor].withCreator(new AmazonActor()).withRouter(RoundRobinRouter(numberOfAmazonActors())), name = "bookMakerRouter")
+
+  val scheduledUpdate =
+    akkaSystem.scheduler.schedule(5 seconds,
+      8 hours,
+      amazonActor,
+      UpdateOfferSummaries)
+
+  sys.addShutdownHook({
+    Logger.info("Shutting down akka...")
+    scheduledUpdate.cancel
+    akkaSystem.shutdown
+  })
 
   lazy private val books = makeBooks(isbns)
 
   private def makeBooks(isbns: List[String]): Future[List[Book]] = {
-    implicit val timeout = Timeout(30, TimeUnit.SECONDS)
+    implicit val timeout = Timeout(60, TimeUnit.SECONDS)
     Future.sequence(isbns.map(isbn => {
-      (bookMakerRouter ? MakeBookFromISBN(isbn)).mapTo[Book]
+      (amazonActor ? GetBookFromISBN(isbn)).mapTo[Book]
     }).sorted(BookOrdering))
   }
 
@@ -251,6 +302,11 @@ class AmazonBookRepository extends BookRepositoryImpl {
 
   def getBook(isbn: String): Future[List[Book]] = {
     makeBooks(List(isbn))
+  }
+
+  def getOfferSummary(isbn: String): Future[Option[OfferSummary]] = {
+    implicit val timeout = Timeout(60, TimeUnit.SECONDS)
+    (amazonActor ? GetOfferSummaryFromISBN(isbn)).mapTo[Option[OfferSummary]]
   }
 
 }

@@ -19,6 +19,10 @@ trait BookRepositoryImpl {
 
   def getBook(isbn: String): Future[List[Book]]
 
+  def getOfferSummary(isbn: String): Future[Option[OfferSummary]]
+
+  def updateOfferSummary(book: Book, offerSummary: Option[OfferSummary])
+
 }
 
 

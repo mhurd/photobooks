@@ -5,8 +5,10 @@ import play.api.libs.json._
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
 import play.api.Logger
+import org.bson.types.ObjectId
 
-case class Book(isbn: Option[String],
+case class Book(id: Option[String],
+                isbn: Option[String],
                 ean: Option[String],
                 title: String,
                 authors: Option[String],
@@ -37,6 +39,18 @@ case class Book(isbn: Option[String],
     listPrice match {
       case None => noData
       case Some(listPriceMatch) => listPriceMatch.formattedPrice
+    }
+
+  def displayableTotalNew: String =
+    offerSummary match {
+      case None => "?"
+      case Some(offerSummaryMatch) => offerSummaryMatch.totalNew
+    }
+
+  def displayableTotalUsed: String =
+    offerSummary match {
+      case None => "?"
+      case Some(offerSummaryMatch) => offerSummaryMatch.totalUsed
     }
 
   def displayableLowestNewPrice: String =
@@ -70,6 +84,7 @@ object Book {
   implicit object BookFormat extends Format[Book] {
 
     def reads(json: JsValue): JsResult[Book] = JsSuccess(Book(
+      (json \ "_id" \ "$oid").as[Option[String]],
       (json \ "isbn").as[Option[String]],
       (json \ "ean").as[Option[String]],
       (json \ "title").as[String],
@@ -114,6 +129,7 @@ object Book {
           case _ => Some(authorsString)
         }
         Some(new Book(
+          None,
           getOptionText(itemAttributesNode \ "ISBN"),
           getOptionText(itemAttributesNode \ "EAN"),
           itemAttributesNode \ "Title" text,

@@ -12,6 +12,8 @@ object BookGetController extends Controller {
     val repository: BookRepositoryImpl = new MongoDbBookRepository()
   }
 
+  val amazonRepo = new AmazonBookRepository()
+
   private val googleAnalyticsCode = Play.current.configuration.getString("google.analytics.code").get
 
   def index = Action {
