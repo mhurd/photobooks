@@ -10,9 +10,27 @@ case class Price(
                   formattedPrice: String
                   ) {
 
-  override def toString: String = {
-    formattedPrice
-  }
+  override def toString: String =  formattedPrice
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: Price =>
+        (that canEqual this) &&
+          amount == that.amount &&
+          currencyCode == that.currencyCode &&
+          formattedPrice == that.formattedPrice
+      case _ => false
+    }
+
+    def canEqual(other: Any): Boolean =
+      other.isInstanceOf[Price]
+
+    override def hashCode: Int =
+      41 * (
+        41 * (
+          41 + amount
+        ) + currencyCode.hashCode
+      ) + formattedPrice.hashCode
 
 }
 

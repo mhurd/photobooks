@@ -247,7 +247,8 @@ class AmazonBookRepository {
           }
           osFuture.onSuccess {
             case os => {
-              bookRepository.repository.updateOfferSummary(book, os)
+              if (book.offerSummary != os) bookRepository.repository.updateOfferSummary(book, os)
+              else Logger.debug("Did not update OfferSummary for '" + book.title + "' it hasn't changed")
             }
           }
         }

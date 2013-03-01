@@ -23,9 +23,30 @@ case class OfferSummary(
       case Some(price) => totalNew + " new, lowest price: " + price.toString
     }
 
-  override def toString: String = {
-    displayableLowestNewPrice + ", " + displayableLowestUsedPrice
-  }
+  override def toString: String = displayableLowestNewPrice + ", " + displayableLowestUsedPrice
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: OfferSummary =>
+        (that canEqual this) &&
+          lowestUsedPrice == that.lowestUsedPrice &&
+          lowestNewPrice == that.lowestNewPrice &&
+          totalUsed == that.totalUsed &&
+          totalNew == that.totalNew
+      case _ => false
+    }
+
+    def canEqual(other: Any): Boolean =
+      other.isInstanceOf[OfferSummary]
+
+    override def hashCode: Int =
+      41 * (
+        41 * (
+          41 * (
+            41 + totalNew.hashCode
+          ) + totalUsed.hashCode
+        ) + lowestNewPrice.hashCode
+      ) + lowestUsedPrice.hashCode()
 
 }
 

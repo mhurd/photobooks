@@ -60,7 +60,7 @@ class MongoDbBookRepository extends BookRepositoryImpl {
       val dbBooks = for {
         bookJson <- booksCollection.find(q)
       } yield {
-        Logger.debug("Getting book: " + bookJson.toString)
+        //Logger.debug("Getting book: " + bookJson.toString)
         Book.BookFormat.reads(Json.parse(bookJson.toString)).get
       }
       dbBooks.toList
