@@ -12,9 +12,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 
 object BookEditController {
 
-  val books = new BookRepository {
-      val repository: BookRepositoryImpl = new MongoDbBookRepository()
-    }
+  val bookRepositoryComponent = new MongoDbBookRepositoryComponent {}
 
   private val googleAnalyticsCode = Play.current.configuration.getString("google.analytics.code").get
 
@@ -53,39 +51,40 @@ object BookEditController {
     )(Book.apply)(Book.unapply)
   )
 
-  def submit(isbn: String) = Action { implicit request =>
-    Logger.debug("Submitted " + isbn)
-    bookForm.bindFromRequest.fold(
+  def submit(isbn: String) = Action {
+    implicit request =>
+      Logger.debug("Submitted " + isbn)
+      bookForm.bindFromRequest.fold(
         formWithErrors => {
           Logger.debug("Form with errors: " + isbn)
           Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode))
         },
         value => Ok("created: " + value)
       )
-    }
+  }
 
   def createBook() = Action {
-      Ok(views.html.bookEdit(bookForm, googleAnalyticsCode))
-    }
+    Ok(views.html.bookEdit(bookForm, googleAnalyticsCode))
+  }
 
   def editBook(isbn: String) = Action {
     request =>
-    val start = System.nanoTime()
-    Async {
-      books.repository.getBook(isbn) map (res => {
-        res match {
-          case Nil => {
-            Logger.debug(request.remoteAddress + " - 404 not found for books/" + isbn)
-            NotFound
+      val start = System.nanoTime()
+      Async {
+        bookRepositoryComponent.bookRepository.getBook(isbn) map (res => {
+          res match {
+            case Nil => {
+              Logger.debug(request.remoteAddress + " - 404 not found for books/" + isbn)
+              NotFound
+            }
+            case head :: tail => {
+              Logger.debug(request.remoteAddress + " - total time to get books/" + isbn + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+              val filledForm = bookForm.fill(head)
+              Ok(views.html.bookEdit(filledForm, googleAnalyticsCode))
+            }
           }
-          case head :: tail => {
-            Logger.debug(request.remoteAddress + " - total time to get books/" + isbn + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
-            val filledForm = bookForm.fill(head)
-            Ok(views.html.bookEdit(filledForm, googleAnalyticsCode))
-          }
-        }
-      })
-    }
+        })
+      }
   }
 
 }
