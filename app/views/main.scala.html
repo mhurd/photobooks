@@ -1,4 +1,5 @@
-@(title: String, googleAnalyticsCode: String)(head: Html)(content: Html)(implicit lang: Lang)
+@(title: String, googleAnalyticsCode: String)(head: Html)(content: Html)(implicit lang: Lang, user: Option[securesocial.core.Identity])
+@import securesocial.core.IdentityProvider
 
 <!DOCTYPE html>
 <html>
@@ -13,16 +14,7 @@
     </head>
     <body>
         <div class="screenshot">
-
-            <div class="navbar navber-fixed-top">
-                <div class="navbar-inner">
-                    <div class="container">
-                        <a class="brand" href="@routes.BookGetController.index()">
-                            @Messages("application.name")
-                        </a>
-                    </div>
-                </div>
-            </div>
+            @mainNav(lang, user)
 
             <div class="container">
                 @content

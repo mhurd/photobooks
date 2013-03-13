@@ -1,0 +1,16 @@
+@(implicit lang: Lang, user: Option[securesocial.core.Identity])
+@import securesocial.core.IdentityProvider
+
+<div class="navbar navber-fixed-top navbar-inverse">
+    <div class="navbar-inner">
+        <a class="brand" href="@routes.BookGetController.index">
+            @Messages("application.name")
+        </a>
+        <ul class="nav .pull-right">
+            @{user match {
+                case None => guestUserNavItem(lang)
+                case Some(loggedInUser) => userLoggedInNavItem(lang, loggedInUser)
+            }}
+        </ul>
+    </div>
+</div>

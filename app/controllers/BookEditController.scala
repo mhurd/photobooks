@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.Results.{Async, NotFound, Ok}
-import play.api.mvc.Action
+import play.api.mvc.{Controller, Action}
 import model._
 import play.api.{Play, Logger}
 
@@ -10,11 +10,16 @@ import play.api.data.Forms._
 
 import play.api.libs.concurrent.Execution.Implicits._
 
-object BookEditController {
+object BookEditController extends Controller with securesocial.core.SecureSocial {
 
   val bookRepositoryComponent = new MongoDbBookRepositoryComponent {}
 
   private val googleAnalyticsCode = Play.current.configuration.getString("google.analytics.code").get
+
+  private val adminUserProvider = Play.current.configuration.getString("admin.user.provider").get
+  private val adminUserId = Play.current.configuration.getString("admin.user.id").get
+
+  private val adminUser = WithProviderAndUserId(adminUserProvider, adminUserId)
 
   val bookCoverMapping = mapping(
     "url" -> text
@@ -51,40 +56,45 @@ object BookEditController {
     )(Book.apply)(Book.unapply)
   )
 
-  def submit(isbn: String) = Action {
+  def submit(isbn: String) = SecuredAction(adminUser) {
     implicit request =>
-      Logger.debug("Submitted " + isbn)
-      bookForm.bindFromRequest.fold(
-        formWithErrors => {
-          Logger.debug("Form with errors: " + isbn)
-          Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode))
-        },
-        value => Ok("created: " + value)
-      )
+    implicit val user = Some(request.user)
+    Logger.debug("Submitted " + isbn)
+    bookForm.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.debug("Form with errors: " + isbn)
+        Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode))
+      },
+      book => Redirect(routes.BookGetController.book(book.isbn.get))
+    )
   }
 
-  def createBook() = Action {
+  def createBook() = SecuredAction(adminUser) {
+    implicit request =>
+    implicit val user = Some(request.user)
     Ok(views.html.bookEdit(bookForm, googleAnalyticsCode))
   }
 
-  def editBook(isbn: String) = Action {
-    request =>
-      val start = System.nanoTime()
-      Async {
-        bookRepositoryComponent.bookRepository.getBook(isbn) map (res => {
-          res match {
-            case Nil => {
-              Logger.debug(request.remoteAddress + " - 404 not found for books/" + isbn)
-              NotFound
-            }
-            case head :: tail => {
-              Logger.debug(request.remoteAddress + " - total time to get books/" + isbn + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
-              val filledForm = bookForm.fill(head)
-              Ok(views.html.bookEdit(filledForm, googleAnalyticsCode))
-            }
+  def editBook(isbn: String) = SecuredAction(adminUser) {
+    implicit request =>
+    implicit val user = Some(request.user)
+    Logger.debug("editBook by user: " + request.user.fullName + " provider: " + request.user.id.providerId + " id: " + request.user.id.id)
+    val start = System.nanoTime()
+    Async {
+      bookRepositoryComponent.bookRepository.getBook(isbn) map (res => {
+        res match {
+          case Nil => {
+            Logger.debug(request.remoteAddress + " - 404 not found for books/" + isbn)
+            NotFound
           }
-        })
-      }
+          case head :: tail => {
+            Logger.debug(request.remoteAddress + " - total time to get books/" + isbn + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+            val filledForm = bookForm.fill(head)
+            Ok(views.html.bookEdit(filledForm, googleAnalyticsCode))
+          }
+        }
+      })
+    }
   }
 
 }

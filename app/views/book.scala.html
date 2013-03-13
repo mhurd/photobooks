@@ -1,4 +1,4 @@
-@(book: model.Book, googleAnalyticsCode: String)
+@(book: model.Book, googleAnalyticsCode: String)(implicit lang: Lang, user: Option[securesocial.core.Identity])
 
 @main(book.title, googleAnalyticsCode){
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/book.css")" />

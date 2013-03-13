@@ -1,4 +1,4 @@
-@(books: List[model.Book], googleAnalyticsCode: String)(implicit lang: Lang)
+@(books: List[model.Book], googleAnalyticsCode: String)(implicit lang: Lang, user: Option[securesocial.core.Identity])
 
 @main("Photobooks", googleAnalyticsCode){
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
@@ -13,7 +13,7 @@
         <ul class="thumbnails">
             @for(book <- books) {
                 <li class="span2" style="height: 180px">
-                    <a class="thumbnail" rel="tooltip" data-delay="1000" title="@book.title" href="/books/@book.isbn">
+                    <a class="thumbnail" rel="tooltip" data-delay="1000" title="@book.title" href="@routes.BookGetController.book(book.isbn.get)">
                         <img src="@book.bookCover(170)" caption="@book.title" alt="@book.title"/>
                     </a>
                 </li>

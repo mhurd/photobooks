@@ -1,0 +1,5 @@
+9994:securesocial.core.DefaultAuthenticatorStore
+9995:securesocial.core.DefaultIdGenerator
+9997:views.securesocial.MyViews
+9998:service.InMemoryUserService
+10005:securesocial.core.providers.GitHubProvider

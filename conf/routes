@@ -7,9 +7,20 @@ GET     /                           controllers.BookGetController.index
 
 # Book
 GET     /books/:isbn               controllers.BookGetController.book(isbn: String)
-GET     /books/edit/:isbn          controllers.BookEditController.editBook(isbn: String)
-POST     /books/edit/:isbn          controllers.BookEditController.submit(isbn: String)
+POST    /books/:isbn               controllers.BookEditController.submit(isbn: String)
+GET     /books/:isbn/edit          controllers.BookEditController.editBook(isbn: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+# SecureSocial Routes: http://securesocial.ws/
+
+# Login page
+GET     /login                      securesocial.controllers.LoginPage.login
+GET     /logout                     securesocial.controllers.LoginPage.logout
+
+# Providers entry points
+GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
+POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
+GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
 

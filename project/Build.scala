@@ -13,13 +13,15 @@ object ApplicationBuild extends Build {
       "commons-codec" % "commons-codec" % "1.7",
       "joda-time" % "joda-time" % "2.0",
       "org.mongodb" %% "casbah" % "2.5.0",
-      "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
+      "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
+      "securesocial" %% "securesocial" % "master-SNAPSHOT"
     )
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
       resolvers += "Twitter Finagle Resolver" at "http://maven.twttr.com",
       resolvers += "snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-      resolvers += "releases"  at "https://oss.sonatype.org/content/groups/scala-tools"
+      resolvers += "releases"  at "https://oss.sonatype.org/content/groups/scala-tools",
+      resolvers += Resolver.url("sbt-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
     )
 
 }
