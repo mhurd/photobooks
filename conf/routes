@@ -6,9 +6,12 @@
 GET     /                           controllers.BookGetController.index
 
 # Book
-GET     /books/:isbn               controllers.BookGetController.book(isbn: String)
-POST    /books/:isbn               controllers.BookEditController.submit(isbn: String)
-GET     /books/:isbn/edit          controllers.BookEditController.editBook(isbn: String)
+GET     /books/$isbn<(\d|X){10}>               controllers.BookGetController.bookByIsbn(isbn: String)
+GET     /books/$isbn<(\d|X){10}>/edit          controllers.BookEditController.editBookByIsbn(isbn: String)
+
+GET     /books/$id<\w{24}>               controllers.BookGetController.bookById(id: String)
+POST    /books/$id<\w{24}>               controllers.BookEditController.submitWithId(id: String)
+GET     /books/$id<\w{24}>/edit          controllers.BookEditController.editBookById(id: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

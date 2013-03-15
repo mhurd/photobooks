@@ -14,19 +14,19 @@ class AmazonClientTest extends FlatSpec {
 
   val isbn = "0199757143"
 
-  "AmazonClient" must "be able to retrieve a book's details by isbn" in {
+  "AmazonClient" must "be able to retrieve a bookByIsbn's details by isbn" in {
     expectResult(isbn) {
       Book.fromAmazonXml(isbn, client.findByIsbn(isbn)).get.isbn.get
     }
   }
 
-  it must "be able to retrieve a book's details by keyword" in {
+  it must "be able to retrieve a bookByIsbn's details by keyword" in {
     expectResult(isbn) {
       Book.fromAmazonXml(isbn, client.findByKeywords(List(isbn))).get.isbn.get
     }
   }
 
-  it must "be able to get offer details for a book by isbn" in {
+  it must "be able to get offer details for a bookByIsbn by isbn" in {
       expectResult(true) {
         val e = client.findOfferSummaryByIsbn(isbn)
         println(e.toString())

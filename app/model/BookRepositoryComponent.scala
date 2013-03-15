@@ -15,7 +15,9 @@ trait BookRepositoryComponent {
 
     def getBooks(): Future[List[Book]]
 
-    def getBook(isbn: String): Future[List[Book]]
+    def getBookByIsbn(isbn: String): Future[List[Book]]
+
+    def getBookById(id: String): Future[List[Book]]
 
     def getOfferSummary(isbn: String): Future[Option[OfferSummary]]
 

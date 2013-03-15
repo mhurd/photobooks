@@ -286,12 +286,12 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
     }
 
     private def makeBook(isbn: String): Option[Book] = {
-      Logger.debug(Thread.currentThread().getName + " - looking up book: " + isbn)
+      Logger.debug(Thread.currentThread().getName + " - looking up bookByIsbn: " + isbn)
       val xml = amazonClient.findByIsbn(isbn)
       try {
         val bookOption = Book.fromAmazonXml(isbn, xml)
         // bookOption match {
-        //   case Some(book) => println (Book.BookFormat.writes(book))
+        //   case Some(bookByIsbn) => println (Book.BookFormat.writes(bookByIsbn))
         //   case None => println("")
         //}
         bookOption

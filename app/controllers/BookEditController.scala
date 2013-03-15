@@ -56,32 +56,26 @@ object BookEditController extends Controller with securesocial.core.SecureSocial
     )(Book.apply)(Book.unapply)
   )
 
-  def submit(isbn: String) = SecuredAction(adminUser) {
+  def submitWithId(id: String) = SecuredAction(adminUser) {
     implicit request =>
     implicit val user = Some(request.user)
-    Logger.debug("Submitted " + isbn)
+    Logger.debug("Submitted " + id)
     bookForm.bindFromRequest.fold(
       formWithErrors => {
-        Logger.debug("Form with errors: " + isbn)
+        Logger.debug("Form with errors: " + id)
         Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode))
       },
-      book => Redirect(routes.BookGetController.book(book.isbn.get))
+      book => Redirect(routes.BookGetController.bookById(book.id.get))
     )
   }
 
-  def createBook() = SecuredAction(adminUser) {
+  def editBookByIsbn(isbn: String) = SecuredAction(adminUser) {
     implicit request =>
     implicit val user = Some(request.user)
-    Ok(views.html.bookEdit(bookForm, googleAnalyticsCode))
-  }
-
-  def editBook(isbn: String) = SecuredAction(adminUser) {
-    implicit request =>
-    implicit val user = Some(request.user)
-    Logger.debug("editBook by user: " + request.user.fullName + " provider: " + request.user.id.providerId + " id: " + request.user.id.id)
+    Logger.debug("editBookByIsbn by user: " + request.user.fullName + " provider: " + request.user.id.providerId + " id: " + request.user.id.id)
     val start = System.nanoTime()
     Async {
-      bookRepositoryComponent.bookRepository.getBook(isbn) map (res => {
+      bookRepositoryComponent.bookRepository.getBookByIsbn(isbn) map (res => {
         res match {
           case Nil => {
             Logger.debug(request.remoteAddress + " - 404 not found for books/" + isbn)
@@ -89,6 +83,28 @@ object BookEditController extends Controller with securesocial.core.SecureSocial
           }
           case head :: tail => {
             Logger.debug(request.remoteAddress + " - total time to get books/" + isbn + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+            val filledForm = bookForm.fill(head)
+            Ok(views.html.bookEdit(filledForm, googleAnalyticsCode))
+          }
+        }
+      })
+    }
+  }
+
+  def editBookById(id: String) = SecuredAction(adminUser) {
+    implicit request =>
+    implicit val user = Some(request.user)
+    Logger.debug("editBookByIsbn by user: " + request.user.fullName + " provider: " + request.user.id.providerId + " id: " + request.user.id.id)
+    val start = System.nanoTime()
+    Async {
+      bookRepositoryComponent.bookRepository.getBookById(id) map (res => {
+        res match {
+          case Nil => {
+            Logger.debug(request.remoteAddress + " - 404 not found for books/" + id)
+            NotFound
+          }
+          case head :: tail => {
+            Logger.debug(request.remoteAddress + " - total time to get books/" + id + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
             val filledForm = bookForm.fill(head)
             Ok(views.html.bookEdit(filledForm, googleAnalyticsCode))
           }

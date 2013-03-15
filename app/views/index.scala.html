@@ -1,8 +1,6 @@
 @(books: List[model.Book], googleAnalyticsCode: String)(implicit lang: Lang, user: Option[securesocial.core.Identity])
 
 @main("Photobooks", googleAnalyticsCode){
-    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
-    <script src="@routes.Assets.at("javascripts/bootstrap.min.js")"></script>
     <script>
         jQuery(function ($) {
             $("a").tooltip()
@@ -11,13 +9,25 @@
 }{
     <div class="row">
         <ul class="thumbnails">
-            @for(book <- books) {
-                <li class="span2" style="height: 180px">
-                    <a class="thumbnail" rel="tooltip" data-delay="1000" title="@book.title" href="@routes.BookGetController.book(book.isbn.get)">
-                        <img src="@book.bookCover(170)" caption="@book.title" alt="@book.title"/>
-                    </a>
-                </li>
-            }
+                @for(book <- books) {
+                    @book.isbn match {
+                        case None => {
+                            <li class="span2" style="height: 180px">
+                                <a class="thumbnail" rel="tooltip" data-delay="1000" title="@book.title" href="@routes.BookGetController.bookById(book.id.get)">
+                                    <img src="@book.bookCover(170)" caption="@book.title" alt="@book.title"/>
+                                </a>
+                            </li>
+                        }
+                        case Some(isbn) => {
+                            <li class="span2" style="height: 180px">
+                                <a class="thumbnail" rel="tooltip" data-delay="1000" title="@book.title" href="@routes.BookGetController.bookByIsbn(book.isbn.get)">
+                                    <img src="@book.bookCover(170)" caption="@book.title" alt="@book.title"/>
+                                </a>
+                            </li>
+                        }
+
+                    }
+                }
         </ul>
     </div>
 }

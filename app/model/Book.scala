@@ -145,7 +145,7 @@ object Book {
         ))
       }
       case _ => {
-        Logger.info("Could not find book: " + isbn)
+        Logger.info("Could not find bookByIsbn: " + isbn)
         None
       }
     }

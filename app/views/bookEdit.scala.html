@@ -10,7 +10,7 @@
          <h1>Edit Book</h1>
     </div>
     <div id="book">
-        @helper.form(action = routes.BookEditController.submit(bookForm("isbn").value.get)) {
+        @helper.form(action = routes.BookEditController.submitWithId(bookForm("id").value.get)) {
 
             @bookForm.globalError.map { error =>
                 <span class="error">@error.message</span>

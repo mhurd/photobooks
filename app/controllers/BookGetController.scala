@@ -19,18 +19,18 @@ object BookGetController extends Controller with securesocial.core.SecureSocial 
     val start = System.nanoTime()
     Async {
       bookRepositoryComponent.bookRepository.getBooks().map(res => {
-        Logger.debug(request.remoteAddress + " - total time to get book index: " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+        Logger.debug(request.remoteAddress + " - total time to get bookByIsbn index: " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
         Ok(views.html.index(res.filter(book => book.valid), googleAnalyticsCode))
       })
     }
   }
 
-  def book(isbn: String) = UserAwareAction {
+  def bookByIsbn(isbn: String) = UserAwareAction {
     implicit request =>
     implicit val user = request.user
     val start = System.nanoTime()
     Async {
-      bookRepositoryComponent.bookRepository.getBook(isbn) map (res => {
+      bookRepositoryComponent.bookRepository.getBookByIsbn(isbn) map (res => {
         res match {
           case Nil => {
             Logger.debug(request.remoteAddress + " - 404 not found for books/" + isbn)
@@ -38,6 +38,26 @@ object BookGetController extends Controller with securesocial.core.SecureSocial 
           }
           case head :: tail => {
             Logger.debug(request.remoteAddress + " - total time to get books/" + isbn + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+            Ok(views.html.book(head, googleAnalyticsCode))
+          }
+        }
+      })
+    }
+  }
+
+  def bookById(id: String) = UserAwareAction {
+    implicit request =>
+    implicit val user = request.user
+    val start = System.nanoTime()
+    Async {
+      bookRepositoryComponent.bookRepository.getBookById(id) map (res => {
+        res match {
+          case Nil => {
+            Logger.debug(request.remoteAddress + " - 404 not found for books/" + id)
+            NotFound
+          }
+          case head :: tail => {
+            Logger.debug(request.remoteAddress + " - total time to get books/" + id + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
             Ok(views.html.book(head, googleAnalyticsCode))
           }
         }
