@@ -5,7 +5,6 @@ import play.api.libs.json._
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
 import play.api.Logger
-import org.bson.types.ObjectId
 
 case class Book(id: Option[String],
                 isbn: Option[String],

@@ -36,14 +36,14 @@ case class OfferSummary(
       case _ => false
     }
 
-    def canEqual(other: Any): Boolean =
-      other.isInstanceOf[OfferSummary]
+  def canEqual(other: Any): Boolean =
+    other.isInstanceOf[OfferSummary]
 
-    override def hashCode: Int =
+  override def hashCode: Int =
+    41 * (
       41 * (
         41 * (
-          41 * (
-            41 + totalNew.hashCode
+          41 + totalNew.hashCode
           ) + totalUsed.hashCode
         ) + lowestNewPrice.hashCode
       ) + lowestUsedPrice.hashCode()

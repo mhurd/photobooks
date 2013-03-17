@@ -57,12 +57,10 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
       Future(books)
     }
 
-
-    def findBookByIsbn(isbn: String): List[Book] = {
-      val q = MongoDBObject("isbn" -> isbn)
-      Cache.getOrElse[List[Book]](isbn, cacheExpiration) {
+    private def findBooks(identifier: String, query: DBObject): List[Book] = {
+      Cache.getOrElse[List[Book]](identifier, cacheExpiration) {
         val dbBooks = for {
-          bookJson <- booksCollection.find(q)
+          bookJson <- booksCollection.find(query)
         } yield {
           Book.BookFormat.reads(Json.parse(bookJson.toString)).get
         }
@@ -70,17 +68,16 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
       }
     }
 
-    def findBookById(id: String): List[Book] = {
+
+    private def findBookByIsbn(isbn: String): List[Book] = {
+      val q = MongoDBObject("isbn" -> isbn)
+      findBooks(isbn, q)
+    }
+
+    private def findBookById(id: String): List[Book] = {
       val objId = new ObjectId(id)
       val idObj = DBObject("_id" -> objId)
-      Cache.getOrElse[List[Book]](id, cacheExpiration) {
-        val dbBooks = for {
-          bookJson <- booksCollection.find(idObj)
-        } yield {
-          Book.BookFormat.reads(Json.parse(bookJson.toString)).get
-        }
-        dbBooks.toList
-      }
+      findBooks(id, idObj)
     }
 
     def getBookByIsbn(isbn: String): Future[List[Book]] = {
