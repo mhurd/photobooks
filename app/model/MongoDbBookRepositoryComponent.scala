@@ -126,7 +126,7 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
               "offerSummary.totalNew" -> os.totalNew,
               "offerSummary.totalUsed" -> os.totalUsed
             )), false, false, WriteConcern.Safe)
-            Logger.debug("Updated OfferSummary for '" + book.title + "' with " + os)
+            Logger.info("Updated OfferSummary for '" + book.title + "' with " + os)
           }
         }
       } catch {

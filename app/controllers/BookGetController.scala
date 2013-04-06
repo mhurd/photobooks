@@ -15,7 +15,7 @@ object BookGetController extends BookController {
       val start = System.nanoTime()
       Async {
         bookRepositoryComponent.bookRepository.getBooks().map(res => {
-          Logger.debug(request.remoteAddress + " - total time to get bookByIsbn index: " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+          Logger.info(request.remoteAddress + " - total time to get bookByIsbn index: " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
           Ok(views.html.index(res.filter(book => book.valid), googleAnalyticsCode))
         })
       }
@@ -26,11 +26,11 @@ object BookGetController extends BookController {
     f(identifier) map (res => {
       res match {
         case Nil => {
-          Logger.debug(request.remoteAddress + " - 404 not found for books/" + identifier)
+          Logger.info(request.remoteAddress + " - 404 not found for books/" + identifier)
           NotFound
         }
         case head :: tail => {
-          Logger.debug(request.remoteAddress + " - total time to get books/" + identifier + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+          Logger.info(request.remoteAddress + " - total time to get books/" + identifier + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
           Ok(views.html.book(head, googleAnalyticsCode))
         }
       }

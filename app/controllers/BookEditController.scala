@@ -50,10 +50,10 @@ object BookEditController extends BookController {
   def submitWithId(id: String) = SecuredAction(adminUserCheck) {
     implicit request =>
       implicit val user = Some(request.user)
-      Logger.debug("Submitted " + id)
+      Logger.info("Submitted " + id)
       bookForm.bindFromRequest.fold(
         formWithErrors => {
-          Logger.debug("Form with errors: " + id)
+          Logger.info("Form with errors: " + id)
           Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode))
         },
         book => Redirect(routes.BookGetController.bookById(book.id.get))
@@ -65,11 +65,11 @@ object BookEditController extends BookController {
     f(identifier) map (res => {
       res match {
         case Nil => {
-          Logger.debug(request.remoteAddress + " - 404 not found for books/" + identifier)
+          Logger.info(request.remoteAddress + " - 404 not found for books/" + identifier)
           NotFound
         }
         case head :: tail => {
-          Logger.debug(request.remoteAddress + " - total time to get books/" + identifier + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
+          Logger.info(request.remoteAddress + " - total time to get books/" + identifier + " = " + (System.nanoTime() - start) / 1000000 + " milli-seconds")
           val filledForm = bookForm.fill(head)
           Ok(views.html.bookEdit(filledForm, googleAnalyticsCode))
         }
@@ -80,7 +80,7 @@ object BookEditController extends BookController {
   def editBookByIsbn(isbn: String) = SecuredAction(adminUserCheck) {
     implicit request =>
       implicit val user = Some(request.user)
-      Logger.debug("editBookByIsbn by user: " + request.user.fullName + " provider: " + request.user.id.providerId + " id: " + request.user.id.id)
+      Logger.info("editBookByIsbn by user: " + request.user.fullName + " provider: " + request.user.id.providerId + " id: " + request.user.id.id)
       Async {
         editBook(bookRepositoryComponent.bookRepository.getBookByIsbn, isbn)
       }
@@ -89,7 +89,7 @@ object BookEditController extends BookController {
   def editBookById(id: String) = SecuredAction(adminUserCheck) {
     implicit request =>
       implicit val user = Some(request.user)
-      Logger.debug("editBookById by user: " + request.user.fullName + " provider: " + request.user.id.providerId + " id: " + request.user.id.id)
+      Logger.info("editBookById by user: " + request.user.fullName + " provider: " + request.user.id.providerId + " id: " + request.user.id.id)
       Async {
         editBook(bookRepositoryComponent.bookRepository.getBookById, id)
       }
