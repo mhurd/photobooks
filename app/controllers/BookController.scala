@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.Controller
-import model.MongoDbBookRepositoryComponent
+import model.{AmazonBookDataRepositoryComponent, MongoDbBookRepositoryComponent}
 import play.api.Play
 
 class BookController extends Controller with securesocial.core.SecureSocial {
@@ -20,7 +20,7 @@ class BookController extends Controller with securesocial.core.SecureSocial {
 
 private object BookController {
 
-  val bookRepositoryComponent = new MongoDbBookRepositoryComponent {}
+  val bookRepositoryComponent = new MongoDbBookRepositoryComponent with AmazonBookDataRepositoryComponent {}
 
   val googleAnalyticsCode = Play.current.configuration.getString("google.analytics.code").get
 

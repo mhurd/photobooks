@@ -60,16 +60,20 @@ object OfferSummary {
   }
 
   private def lowestUsedPrice(offerSummaryNode: NodeSeq, total: String): Option[Price] = {
-    total match {
-      case "0" => None
-      case _ => Some(realPrice(offerSummaryNode \ "LowestUsedPrice"))
-    }
+    getPrice(offerSummaryNode, "LowestUsedPrice", total)
   }
 
   private def lowestNewPrice(offerSummaryNode: NodeSeq, total: String): Option[Price] = {
-    total match {
-      case "0" => None
-      case _ => Some(realPrice(offerSummaryNode \ "LowestNewPrice"))
+    getPrice(offerSummaryNode, "LowestNewPrice", total)
+  }
+
+  private def getPrice(offerSummaryNode: NodeSeq, priceName: String, total: String): Option[Price] = {
+    offerSummaryNode \ priceName \ "Amount" text match {
+      case "" => None
+      case _ => total match {
+        case "0" => None
+        case _ => Some(realPrice(offerSummaryNode \ priceName))
+      }
     }
   }
 
@@ -102,7 +106,8 @@ object OfferSummary {
   }
 
   def fromAmazonXml(xml: Elem): Option[OfferSummary] = {
-    val offerSummaryNode = xml \ "Items" \ "Item" \ "OfferSummary"
+    val firstItem = xml \ "Items" \ "Item" head // sometime multiple items are returned (different languages), just pick the first for the time being
+    val offerSummaryNode = firstItem \ "OfferSummary"
     val totalUsed = (offerSummaryNode \ "TotalUsed").text
     val totalNew = (offerSummaryNode \ "TotalNew").text
     Some(OfferSummary(

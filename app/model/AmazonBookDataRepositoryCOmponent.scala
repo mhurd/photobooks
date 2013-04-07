@@ -253,7 +253,7 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
             osFuture.onSuccess {
               case os => {
                 if (book.offerSummary != os) bookRepository.updateOfferSummary(book, os)
-                else Logger.debug("Did not update OfferSummary for '" + book.title + "' it hasn't changed")
+                else Logger.info("Did not update OfferSummary for '" + book.title + "' it hasn't changed")
               }
             }
           }
@@ -265,7 +265,7 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
       Props[AmazonActor].withCreator(new AmazonActor()).withRouter(RoundRobinRouter(numberOfAmazonActors())), name = "bookMakerRouter")
 
     val scheduledUpdate =
-      akkaSystem.scheduler.schedule(30 minutes,
+      akkaSystem.scheduler.schedule(1 minutes,
         8 hours,
         amazonActor,
         UpdateOfferSummaries)
@@ -286,7 +286,7 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
     }
 
     private def makeBook(isbn: String): Option[Book] = {
-      Logger.debug(Thread.currentThread().getName + " - looking up bookByIsbn: " + isbn)
+      Logger.info(Thread.currentThread().getName + " - looking up bookByIsbn: " + isbn)
       val xml = amazonClient.findByIsbn(isbn)
       try {
         val bookOption = Book.fromAmazonXml(isbn, xml)
