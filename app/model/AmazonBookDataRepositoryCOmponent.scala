@@ -178,7 +178,8 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
         "0870708120",
         "0957434103",
         "0870700944",
-        "190789327X")
+        "190789327X",
+        "3836538725")
 
     object BookOrdering extends Ordering[Future[Book]] {
       def compare(a: Future[Book], b: Future[Book]) = {
@@ -205,6 +206,8 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
     case class UpdateOfferSummaries() extends AmazonMessage
 
     case class UpdateOfferSummary(book: Book) extends AmazonMessage
+
+    case class BackupBooks() extends AmazonMessage
 
     class AmazonActor extends Actor with ActorLogging {
       def receive = {
@@ -244,6 +247,27 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
             })
           }
         }
+        case BackupBooks => {
+          val booksFuture = bookRepository.getBooks()
+          booksFuture.onFailure {
+            case ex => Logger.error(ex.getMessage, ex)
+          }
+          booksFuture.onSuccess {
+            case xs => {
+              val pw = new java.io.PrintWriter("./booksBackup.json")
+              try {
+                (xs map (Book.BookFormat.writes(_))) map (jsonBook => pw.println(jsonBook.toString()))
+              } finally {
+                try {
+                  pw.close()
+                } catch {
+                  case e: Exception ⇒
+                    // do nothing
+                }
+              }
+            }
+          }
+        }
         case UpdateOfferSummary(book) => {
           if (book.isbn.isDefined) {
             val osFuture = getOfferSummary(book.isbn.get)
@@ -269,6 +293,12 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
         8 hours,
         amazonActor,
         UpdateOfferSummaries)
+
+    val scheduledBackup =
+      akkaSystem.scheduler.schedule(1 minutes,
+        7 days,
+        amazonActor,
+        BackupBooks)
 
     sys.addShutdownHook({
       Logger.info("Shutting down akka...")

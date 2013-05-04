@@ -56,7 +56,9 @@ object BookEditController extends BookController {
           Logger.info("Form with errors: " + id)
           Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode))
         },
-        book => Redirect(routes.BookGetController.bookById(book.id.get))
+        book => {
+          Redirect(routes.BookGetController.bookById(book.id.get))
+        }
       )
   }
 
