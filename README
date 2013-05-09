@@ -2,7 +2,7 @@ Play 2.0 Framework
 ==================
 
 To familiarise myself with Scala, Play & MongoDB I'm re-writing my photobook library
-(currently available at http://hurdy.org) that monitors the new and used prices of my
+(currently available at http://photobooks.mhurd.com) that monitors the new and used prices of my
 photobooks using the Amazon API.
 
 This is a work in progress (and progress may be slow and job and two kids leaves little time!)
