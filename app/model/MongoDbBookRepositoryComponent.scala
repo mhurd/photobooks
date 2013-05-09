@@ -36,11 +36,12 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
     private val replicaSetServers = getServerAddresses(Play.current.configuration.getString("mongodb.servers").get)
     private val username = Play.current.configuration.getString("mongodb.username").get
     private val password = Play.current.configuration.getString("mongodb.password").get
+    private val database = Play.current.configuration.getString("mongodb.database").get
 
     Logger.info("Connecting to MongoDB servers: " + replicaSetServers)
     val client = MongoConnection(replicaSetServers)
 
-    val photobooksDb = client("photobooks-dev") // the name of the database
+    val photobooksDb = client(database) // the name of the database
     Logger.info("Authenticating as user: " + username)
     photobooksDb.authenticate(username, password)
 
