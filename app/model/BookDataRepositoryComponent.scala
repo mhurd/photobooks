@@ -1,6 +1,7 @@
 package model
 
 import concurrent.Future
+import model.Book.OfferSummary
 
 /**
  * http://www.cakesolutions.net/teamblogs/2011/12/19/cake-pattern-in-depth/

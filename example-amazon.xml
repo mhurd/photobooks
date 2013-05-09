@@ -1,0 +1,180 @@
+<ItemLookupResponse xmlns="http://webservices.amazon.com/AWSECommerceService/2011-08-01">
+  <OperationRequest>
+    <RequestId>933e7b29-dceb-4dc2-8c58-61cc4858abcd</RequestId>
+    <Arguments>
+      <Argument Value="All" Name="Condition"/>
+      <Argument Value="ItemLookup" Name="Operation"/>
+      <Argument Value="AWSECommerceService" Name="Service"/>
+      <Argument Value="All" Name="Offer"/>
+      <Argument Value="fleetiphotobl-20" Name="AssociateTag"/>
+      <Argument Value="2011-08-01" Name="Version"/>
+      <Argument Value="Books" Name="SearchIndex"/>
+      <Argument Value="T5SqmAhrFKpta/1Gmw4m1D1aMZE45fZj31LDXdJmqKI=" Name="Signature"/>
+      <Argument Value="1905712022" Name="ItemId"/>
+      <Argument Value="ISBN" Name="IdType"/>
+      <Argument Value="AKIAIUZ3CEXC5EF5RJUQ" Name="AWSAccessKeyId"/>
+      <Argument Value="2013-05-09T14:52:48Z" Name="Timestamp"/>
+      <Argument Value="ItemAttributes,OfferSummary,Images" Name="ResponseGroup"/>
+    </Arguments>
+    <RequestProcessingTime>0.0271090000000000</RequestProcessingTime>
+  </OperationRequest>
+  <Items>
+    <Request>
+      <IsValid>True</IsValid>
+      <ItemLookupRequest>
+        <Condition>All</Condition>
+        <IdType>ISBN</IdType>
+        <ItemId>1905712022</ItemId>
+        <ResponseGroup>ItemAttributes</ResponseGroup>
+        <ResponseGroup>OfferSummary</ResponseGroup>
+        <ResponseGroup>Images</ResponseGroup>
+        <SearchIndex>Books</SearchIndex>
+        <VariationPage>All</VariationPage>
+      </ItemLookupRequest>
+    </Request>
+    <Item>
+      <ASIN>1905712022</ASIN>
+      <DetailPageURL>http://www.amazon.co.uk/Alter-Ego-Avatars-their-Creators/dp/1905712022%3FSubscriptionId%3DAKIAIUZ3CEXC5EF5RJUQ%26tag%3Dfleetiphotobl-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D1905712022</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.co.uk/gp/registry/wishlist/add-item.html%3Fasin.0%3D1905712022%26SubscriptionId%3DAKIAIUZ3CEXC5EF5RJUQ%26tag%3Dfleetiphotobl-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D12734%26creativeASIN%3D1905712022</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.co.uk/gp/pdp/taf/1905712022%3FSubscriptionId%3DAKIAIUZ3CEXC5EF5RJUQ%26tag%3Dfleetiphotobl-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D12734%26creativeASIN%3D1905712022</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.co.uk/review/product/1905712022%3FSubscriptionId%3DAKIAIUZ3CEXC5EF5RJUQ%26tag%3Dfleetiphotobl-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D12734%26creativeASIN%3D1905712022</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.co.uk/gp/offer-listing/1905712022%3FSubscriptionId%3DAKIAIUZ3CEXC5EF5RJUQ%26tag%3Dfleetiphotobl-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D12734%26creativeASIN%3D1905712022</URL>
+        </ItemLink>
+      </ItemLinks>
+      <SmallImage>
+        <URL>http://ecx.images-amazon.com/images/I/41Q9KAPAJZL._SL75_.jpg</URL>
+        <Height Units="pixels">75</Height>
+        <Width Units="pixels">36</Width>
+      </SmallImage>
+      <MediumImage>
+        <URL>http://ecx.images-amazon.com/images/I/41Q9KAPAJZL._SL160_.jpg</URL>
+        <Height Units="pixels">160</Height>
+        <Width Units="pixels">76</Width>
+      </MediumImage>
+      <LargeImage>
+        <URL>http://ecx.images-amazon.com/images/I/41Q9KAPAJZL.jpg</URL>
+        <Height Units="pixels">500</Height>
+        <Width Units="pixels">238</Width>
+      </LargeImage>
+      <ImageSets>
+        <ImageSet Category="primary">
+          <SwatchImage>
+            <URL>http://ecx.images-amazon.com/images/I/41Q9KAPAJZL._SL30_.jpg</URL>
+            <Height Units="pixels">30</Height>
+            <Width Units="pixels">14</Width>
+          </SwatchImage>
+          <SmallImage>
+            <URL>http://ecx.images-amazon.com/images/I/41Q9KAPAJZL._SL75_.jpg</URL>
+            <Height Units="pixels">75</Height>
+            <Width Units="pixels">36</Width>
+          </SmallImage>
+          <ThumbnailImage>
+            <URL>http://ecx.images-amazon.com/images/I/41Q9KAPAJZL._SL75_.jpg</URL>
+            <Height Units="pixels">75</Height>
+            <Width Units="pixels">36</Width>
+          </ThumbnailImage>
+          <TinyImage>
+            <URL>http://ecx.images-amazon.com/images/I/41Q9KAPAJZL._SL110_.jpg</URL>
+            <Height Units="pixels">110</Height>
+            <Width Units="pixels">52</Width>
+          </TinyImage>
+          <MediumImage>
+            <URL>http://ecx.images-amazon.com/images/I/41Q9KAPAJZL._SL160_.jpg</URL>
+            <Height Units="pixels">160</Height>
+            <Width Units="pixels">76</Width>
+          </MediumImage>
+          <LargeImage>
+            <URL>http://ecx.images-amazon.com/images/I/41Q9KAPAJZL.jpg</URL>
+            <Height Units="pixels">500</Height>
+            <Width Units="pixels">238</Width>
+          </LargeImage>
+        </ImageSet>
+      </ImageSets>
+      <ItemAttributes>
+        <Author>Robbie Cooper</Author>
+        <Author>Julian Dibbell</Author>
+        <Binding>Hardcover</Binding>
+        <EAN>9781905712021</EAN>
+        <EANList>
+          <EANListElement>9781905712021</EANListElement>
+        </EANList>
+        <Feature>New</Feature>
+        <Feature>Mint Condition</Feature>
+        <Feature>Dispatch same day for order received before 12 noon</Feature>
+        <Feature>Guaranteed packaging</Feature>
+        <Feature>No quibbles returns</Feature>
+        <ISBN>1905712022</ISBN>
+        <ItemDimensions>
+          <Height Units="hundredths-inches">1201</Height>
+          <Length Units="hundredths-inches">575</Length>
+          <Weight Units="hundredths-pounds">161</Weight>
+          <Width Units="hundredths-inches">71</Width>
+        </ItemDimensions>
+        <Label>Chris Boot</Label>
+        <Languages>
+          <Language>
+            <Name>English</Name>
+            <Type>Unknown</Type>
+          </Language>
+          <Language>
+            <Name>English</Name>
+            <Type>Original Language</Type>
+          </Language>
+          <Language>
+            <Name>English</Name>
+            <Type>Published</Type>
+          </Language>
+        </Languages>
+        <ListPrice>
+          <Amount>1795</Amount>
+          <CurrencyCode>GBP</CurrencyCode>
+          <FormattedPrice>£17.95</FormattedPrice>
+        </ListPrice>
+        <Manufacturer>Chris Boot</Manufacturer>
+        <NumberOfItems>1</NumberOfItems>
+        <NumberOfPages>140</NumberOfPages>
+        <PackageDimensions>
+          <Height Units="hundredths-inches">71</Height>
+          <Length Units="hundredths-inches">1220</Length>
+          <Weight Units="hundredths-pounds">168</Weight>
+          <Width Units="hundredths-inches">606</Width>
+        </PackageDimensions>
+        <ProductGroup>Book</ProductGroup>
+        <ProductTypeName>ABIS_BOOK</ProductTypeName>
+        <PublicationDate>2007-06-18</PublicationDate>
+        <Publisher>Chris Boot</Publisher>
+        <SKU>DAP-MA-29-aar1</SKU>
+        <Studio>Chris Boot</Studio>
+        <Title>Alter Ego: Avatars and their Creators</Title>
+      </ItemAttributes>
+      <OfferSummary>
+        <LowestNewPrice>
+          <Amount>1855</Amount>
+          <CurrencyCode>GBP</CurrencyCode>
+          <FormattedPrice>£18.55</FormattedPrice>
+        </LowestNewPrice>
+        <LowestUsedPrice>
+          <Amount>231</Amount>
+          <CurrencyCode>GBP</CurrencyCode>
+          <FormattedPrice>£2.31</FormattedPrice>
+        </LowestUsedPrice>
+        <TotalNew>5</TotalNew>
+        <TotalUsed>25</TotalUsed>
+        <TotalCollectible>0</TotalCollectible>
+        <TotalRefurbished>0</TotalRefurbished>
+      </OfferSummary>
+    </Item>
+  </Items>
+</ItemLookupResponse>

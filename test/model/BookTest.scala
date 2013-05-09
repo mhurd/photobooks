@@ -5,25 +5,35 @@ import play.api.libs.json.Json
 
 class BookTest extends FlatSpec {
 
-  val jsonComplete = """{"isbn":"0199757143","ean":"9780199757145","title":"Philosophers","authors":"Steve Pyke","binding":"Hardcover","numberOfPages":"224","publicationDate":"2011-08-25","publisher":"OUP USA","bookCover":{"url":"http://ecx.images-amazon.com/images/I/51-nWfH1u2L.jpg"},"listPrice":{"amount":2500,"currencyCode":"GBP","formattedPrice":"£25.00"},"offerSummary":{"lowestUsedPrice":{"amount":1449,"currencyCode":"GBP","formattedPrice":"£14.49"},"lowestNewPrice":{"amount":1368,"currencyCode":"GBP","formattedPrice":"£13.68"},"totalUsed":"11","totalNew":"21"}}"""
-  val jsonNoIsbnOrEan = """{"title":"Philosophers","authors":"Steve Pyke","binding":"Hardcover","numberOfPages":"224","publicationDate":"2011-08-25","publisher":"OUP USA","bookCover":{"url":"http://ecx.images-amazon.com/images/I/51-nWfH1u2L.jpg"},"listPrice":{"amount":2500,"currencyCode":"GBP","formattedPrice":"£25.00"},"offerSummary":{"lowestUsedPrice":{"amount":1449,"currencyCode":"GBP","formattedPrice":"£14.49"},"lowestNewPrice":{"amount":1368,"currencyCode":"GBP","formattedPrice":"£13.68"},"totalUsed":"11","totalNew":"21"}}"""
-  val jsonNoListPrice = """{"isbn":"0199757143","ean":"9780199757145","title":"Philosophers","authors":"Steve Pyke","binding":"Hardcover","numberOfPages":"224","publicationDate":"2011-08-25","publisher":"OUP USA","bookCover":{"url":"http://ecx.images-amazon.com/images/I/51-nWfH1u2L.jpg"},"offerSummary":{"lowestUsedPrice":{"amount":1449,"currencyCode":"GBP","formattedPrice":"£14.49"},"lowestNewPrice":{"amount":1368,"currencyCode":"GBP","formattedPrice":"£13.68"},"totalUsed":"11","totalNew":"21"}}"""
+  val book = Book(
+              None,
+              Some("an isbn"),
+              Some("my ean"),
+              "a title",
+              Some("me and my friend"),
+              Some("Hardcover"),
+              Some("First Edition"),
+              Some("100"),
+              Some("03-01-1977"),
+              Some("ACME"),
+              Some("http://somewhere.com/small.jpg"),
+              Some("http://somewhere.com/large.jpg"),
+              Some(1223),
+              Some(1111),
+              Some(10),
+              Some(System.currentTimeMillis()),
+              true,
+              Some("some boring musings"))
 
-  "BookFormat" must "be able to construct a Book from complete JSON" in {
-    expectResult("0199757143") {
-      Book.BookFormat.reads(Json.parse(jsonComplete)).get.isbn.get
+  "BookFormat" must "be able to 'read' a JSON book from the output of 'writing' out JSON" in {
+    expectResult(true) {
+      Book.BookFormat.reads(Book.BookFormat.writes(book)).get.isbn.get == book
     }
   }
 
-  it must "be able to construct a Book from incomplete JSON missing an ISBN or EAN" in {
-    expectResult("None") {
-      Book.BookFormat.reads(Json.parse(jsonNoIsbnOrEan)).get.isbn.toString
-    }
-  }
-
-  it must "be able to construct a Book from incomplete JSON missing a List Price" in {
-    expectResult("None") {
-      Book.BookFormat.reads(Json.parse(jsonNoListPrice)).get.listPrice.toString
+  it must "be able to 'read' another JSON book from the output of 'writing' out JSON" in {
+    expectResult(true) {
+      Book.BookFormat.reads(Book.BookFormat.writes(book)).get.isbn.get == book
     }
   }
 

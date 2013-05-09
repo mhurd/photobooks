@@ -2,6 +2,7 @@ package model
 
 
 import concurrent.Future
+import model.Book.OfferSummary
 
 
 /**
@@ -22,6 +23,8 @@ trait BookRepositoryComponent {
     def getOfferSummary(isbn: String): Future[Option[OfferSummary]]
 
     def updateOfferSummary(book: Book, offerSummary: Option[OfferSummary])
+
+    def saveBook(book: Book)
 
   }
 

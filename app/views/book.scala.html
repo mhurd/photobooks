@@ -15,7 +15,7 @@
         <table class="table">
             <tr>
                 <td align="right">
-                    <img style="float: right" src="@book.bookCover" caption="@book.title" alt="@book.title"/>
+                    <img style="float: right" src="@book.largeBookCoverWithDefault" caption="@book.title" alt="@book.title"/>
                 </td>
                 <td align="left">
                     <dl class="dl-horizontal">
@@ -27,9 +27,9 @@
                         <dt>ISBN:</dt> <dd>@book.displayableStringOption(book.isbn)</dd>
                         <dt>EAN:</dt> <dd>@book.displayableStringOption(book.ean)</dd>
                         <dt>ID:</dt> <dd>@book.displayableStringOption(book.id)</dd>
+                        <dt>Signed:</dt><dd>@book.signed</dd>
                         <dt>List price:</dt> <dd>@book.displayableListPrice</dd>
-                        <dt>Lowest New Price:</dt> <dd>@book.displayableLowestNewPrice <i>(@book.displayableTotalNew available)</i></dd>
-                        <dt>Lowest Used Price:</dt> <dd>@book.displayableLowestUsedPrice <i>(@book.displayableTotalUsed available)</i></dd>
+                        <dt>Lowest Price:</dt> <dd>@book.displayableLowestPrice <i>(@book.displayableTotalAvailable available)</i></dd>
                     </dl>
                 </td>
             </tr>

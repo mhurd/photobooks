@@ -1,7 +1,8 @@
 package amazon
 
 import org.scalatest.FlatSpec
-import model.{OfferSummary, Book}
+import model.Book.OfferSummary
+import model.Book
 
 class AmazonClientTest extends FlatSpec {
 
@@ -30,7 +31,9 @@ class AmazonClientTest extends FlatSpec {
       expectResult(true) {
         val e = client.findOfferSummaryByIsbn(isbn)
         println(e.toString())
-        OfferSummary.fromAmazonXml(e).get.isInstanceOf[OfferSummary]
+        val result = Book.availabilityFromAmazonXml(e)
+        println(result)
+        result.isInstanceOf[Option[OfferSummary]]
       }
     }
 

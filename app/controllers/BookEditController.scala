@@ -12,23 +12,6 @@ import concurrent.Future
 
 object BookEditController extends BookController {
 
-  val bookCoverMapping = mapping(
-    "url" -> text
-  )(BookCover.apply)(BookCover.unapply)
-
-  val priceMapping = mapping(
-    "amount" -> number,
-    "currencyCode" -> text,
-    "formattedPrice" -> text
-  )(Price.apply)(Price.unapply)
-
-  val offerSummaryMapping = mapping(
-    "lowestUsedPrice" -> optional(priceMapping),
-    "lowestNewPrice" -> optional(priceMapping),
-    "totalUsed" -> text,
-    "totalNew" -> text
-  )(OfferSummary.apply)(OfferSummary.unapply)
-
   val bookForm = Form(
     mapping(
       "id" -> optional(text),
@@ -41,9 +24,14 @@ object BookEditController extends BookController {
       "numberOfPages" -> optional(text),
       "publicationDate" -> optional(text),
       "publisher" -> optional(text),
-      "bookCover" -> bookCoverMapping,
-      "listPrice" -> optional(priceMapping),
-      "offerSummary" -> optional(offerSummaryMapping)
+      "smallBookCover" -> optional(text),
+      "largeBookCover" -> optional(text),
+      "listPrice" -> optional(number),
+      "lowestPrice" -> optional(number),
+      "totalAvailable" -> optional(number),
+      "lastPriceUpdateTimestamp" -> optional(longNumber()),
+      "signed" -> boolean,
+      "notes" -> optional(text)
     )(Book.apply)(Book.unapply)
   )
 

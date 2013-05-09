@@ -5,6 +5,8 @@ import play.api.libs.json._
 import play.api.libs.json.JsObject
 import play.api.libs.json.JsString
 import play.api.Logger
+import com.mongodb.casbah.commons.MongoDBObject
+import com.mongodb.DBObject
 
 case class Book(id: Option[String],
                 isbn: Option[String],
@@ -16,13 +18,32 @@ case class Book(id: Option[String],
                 numberOfPages: Option[String],
                 publicationDate: Option[String],
                 publisher: Option[String],
-                bookCover: BookCover,
-                listPrice: Option[Price],
-                offerSummary: Option[OfferSummary]) {
-
-  def valid: Boolean = true
+                smallBookCover: Option[String],
+                largeBookCover: Option[String],
+                listPrice: Option[Int],
+                lowestPrice: Option[Int],
+                totalAvailable: Option[Int],
+                lastPriceUpdateTimestamp: Option[Long],
+                signed: Boolean,
+                notes: Option[String]) {
 
   def noData = "- no data -"
+
+  def noImage = "/assets/images/no-image.jpg"
+
+  def smallBookCoverWithDefault: String =
+    if (smallBookCover.isEmpty || smallBookCover.get == "") {
+      noImage
+    } else {
+      smallBookCover.get
+    }
+
+  def largeBookCoverWithDefault: String =
+    if (largeBookCover.isEmpty || largeBookCover.get == "") {
+      noImage
+    } else {
+      largeBookCover.get
+    }
 
   def displayableStringOption(option: Option[String]): String =
     option match {
@@ -30,48 +51,22 @@ case class Book(id: Option[String],
       case Some(text) => text
     }
 
-  def bookCover(size: Int): BookCover = {
-    bookCover.size(size)
-  }
-
   def displayableListPrice: String =
     listPrice match {
       case None => noData
-      case Some(listPriceMatch) => listPriceMatch.formattedPrice
+      case Some(listPriceMatch) => "£" + (listPriceMatch / 100).toString
     }
 
-  def displayableTotalNew: String =
-    offerSummary match {
+  def displayableTotalAvailable: String =
+    totalAvailable match {
       case None => "?"
-      case Some(offerSummaryMatch) => offerSummaryMatch.totalNew
+      case Some(available) => available.toString
     }
 
-  def displayableTotalUsed: String =
-    offerSummary match {
-      case None => "?"
-      case Some(offerSummaryMatch) => offerSummaryMatch.totalUsed
-    }
-
-  def displayableLowestNewPrice: String =
-    offerSummary match {
+  def displayableLowestPrice: String =
+    lowestPrice match {
       case None => noData
-      case Some(offerSummaryMatch) => {
-        offerSummaryMatch.lowestNewPrice match {
-          case None => noData
-          case Some(price) => price.formattedPrice
-        }
-      }
-    }
-
-  def displayableLowestUsedPrice: String =
-    offerSummary match {
-      case None => noData
-      case Some(offerSummaryMatch) => {
-        offerSummaryMatch.lowestUsedPrice match {
-          case None => noData
-          case Some(price) => price.formattedPrice
-        }
-      }
+      case Some(price) => "£" + (price / 100).toString
     }
 
   override def toString = Book.BookFormat.writes(this).toString()
@@ -79,6 +74,31 @@ case class Book(id: Option[String],
 }
 
 object Book {
+
+  type Price = Option[Int]
+  type TotalAvailable = Option[Int]
+  type OfferSummary = (Price, TotalAvailable)
+
+  implicit def book2DbObject(book: Book): DBObject =
+    MongoDBObject(
+      "isbn" -> book.isbn,
+      "ean" -> book.ean,
+      "title" -> book.title,
+      "authors" -> book.authors,
+      "binding" -> book.binding,
+      "edition" -> book.edition,
+      "numberOfPages" -> book.numberOfPages,
+      "publicationDate" -> book.publicationDate,
+      "publisher" -> book.publisher,
+      "smallBookCover" -> book.smallBookCover,
+      "largeBookCover" -> book.largeBookCover,
+      "listPrice" -> book.listPrice,
+      "lowestPrice" -> book.lowestPrice,
+      "totalAvailable" -> book.totalAvailable,
+      "lastPriceUpdateTimestamp" -> book.lastPriceUpdateTimestamp,
+      "signed" -> book.signed,
+      "notes" -> book.notes
+    )
 
   implicit object BookFormat extends Format[Book] {
 
@@ -93,9 +113,14 @@ object Book {
       (json \ "numberOfPages").as[Option[String]],
       (json \ "publicationDate").as[Option[String]],
       (json \ "publisher").as[Option[String]],
-      BookCover.BookCoverFormat.reads(json \ "bookCover").get,
-      Price.PriceFormat.reads(json \ "listPrice").get,
-      OfferSummary.OfferSummaryFormat.reads(json \ "offerSummary").get))
+      (json \ "smallBookCover").as[Option[String]],
+      (json \ "largeBookCover").as[Option[String]],
+      (json \ "listPrice").as[Option[Int]],
+      (json \ "lowestPrice").as[Option[Int]],
+      (json \ "totalAvailable").as[Option[Int]],
+      (json \ "lastPriceUpdateTimestamp").as[Option[Long]],
+      (json \ "signed").as[Boolean],
+      (json \ "notes").as[Option[String]]))
 
     def writes(book: Book): JsValue = JsObject(List(
       "isbn" -> Json.toJson(book.isbn),
@@ -107,9 +132,15 @@ object Book {
       "numberOfPages" -> Json.toJson(book.numberOfPages),
       "publicationDate" -> Json.toJson(book.publicationDate),
       "publisher" -> Json.toJson(book.publisher),
-      "bookCover" -> BookCover.BookCoverFormat.writes(book.bookCover),
-      "listPrice" -> Price.PriceFormat.writes(book.listPrice),
-      "offerSummary" -> OfferSummary.OfferSummaryFormat.writes(book.offerSummary)))
+      "smallBookCover" -> Json.toJson(book.smallBookCover),
+      "largeBookCover" -> Json.toJson(book.largeBookCover),
+      "listPrice" -> Json.toJson(book.listPrice),
+      "lowestPrice" -> Json.toJson(book.lowestPrice),
+      "totalAvailable" -> Json.toJson(book.totalAvailable),
+      "lastPriceUpdateTimestamp" -> Json.toJson(book.lastPriceUpdateTimestamp),
+      "signed" -> Json.toJson(book.signed),
+      "notes" -> Json.toJson(book.notes)))
+
   }
 
   private def getOptionText(node: NodeSeq): Option[String] =
@@ -118,15 +149,56 @@ object Book {
       case Some(aNode) => Some(aNode.text)
     }
 
-  def fromAmazonXml(isbn: String, xml: Elem): Option[Book] = {
+  private def getOptionInt(node: NodeSeq): Option[Int] =
+    node.headOption match {
+      case None => None
+      case Some(aNode) => Some(aNode.text.toInt)
+    }
+
+  private def lowestPrice(offerSummaryNode: NodeSeq): Option[Int] = {
+    val lowestUsedPrice = getPrice(offerSummaryNode, "LowestUsedPrice")
+    val lowestNewPrice = getPrice(offerSummaryNode, "LowestNewPrice")
+    lowestUsedPrice match {
+      case None => lowestNewPrice
+      case Some(uPrice) => lowestNewPrice match {
+        case None => lowestUsedPrice
+        case Some(nPrice) => if (uPrice <= nPrice) Some(uPrice) else Some(nPrice)
+      }
+    }
+  }
+
+  private def getPrice(offerSummaryNode: NodeSeq, priceName: String): Option[Int] = {
+    offerSummaryNode \ priceName \ "Amount" text match {
+      case "" => None
+      case total => total match {
+        case "0" => None
+        case amount => Some(amount.toInt)
+      }
+    }
+  }
+
+  def availabilityFromAmazonXml(xml: NodeSeq): Option[OfferSummary] = {
+    val offerSummaryNode = xml \ "Items" \ "Item" \ "OfferSummary" head
+    val totalUsed = (offerSummaryNode \ "TotalUsed").text
+    val totalNew = (offerSummaryNode \ "TotalNew").text
+    val totalAvailable = if (totalUsed == "") 0 else totalUsed.toInt + (if (totalNew == "") 0 else totalNew.toInt)
+    totalAvailable match {
+      case 0 => Some((None, Some(0)))
+      case _ => Some((lowestPrice(offerSummaryNode), Some(totalAvailable)))
+    }
+  }
+
+  def fromAmazonXml(isbn: String, xml: Elem): Option[Book] =
     (xml \\ "Error").size match {
       case 0 => {
-        val itemAttributesNode = xml \ "Items" \ "Item" \ "ItemAttributes"
+        val itemNode = xml \ "Items" \ "Item"
+        val itemAttributesNode = itemNode \ "ItemAttributes"
         val authorsString = (itemAttributesNode \ "Author" map (f => f.text) mkString (", "))
         val authors = authorsString match {
           case "" => None
           case _ => Some(authorsString)
         }
+        val amazonAvailability = availabilityFromAmazonXml(xml)
         Some(new Book(
           None,
           getOptionText(itemAttributesNode \ "ISBN"),
@@ -138,16 +210,25 @@ object Book {
           getOptionText(itemAttributesNode \ "NumberOfPages"),
           getOptionText(itemAttributesNode \ "PublicationDate"),
           getOptionText(itemAttributesNode \ "Publisher"),
-          BookCover.fromAmazonXml(xml),
-          Price.fromAmazonXml(itemAttributesNode \ "ListPrice"),
-          OfferSummary.fromAmazonXml(xml)
-        ))
+          getOptionText(itemNode \ "MediumImage" \ "URL"),
+          getOptionText(itemNode \ "LargeImage" \ "URL"),
+          getOptionInt(itemAttributesNode \ "ListPrice" \ "Amount"),
+          amazonAvailability match {
+            case None => None
+            case Some(some) => some._1
+          },
+          amazonAvailability match {
+            case None => None
+            case Some(some) => some._2
+          },
+          Some(System.currentTimeMillis()),
+          false,
+          None))
       }
       case _ => {
         Logger.info("Could not find bookByIsbn: " + isbn)
         None
       }
     }
-  }
 
 }

@@ -10,6 +10,7 @@ import akka.util.Timeout
 import java.util.concurrent.TimeUnit
 import concurrent.duration._
 import concurrent.ExecutionContext.Implicits.global
+import model.Book.OfferSummary
 
 trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
 
@@ -226,7 +227,7 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
         case GetOfferSummaryFromISBN(isbn) ⇒ {
           try {
             val xml = amazonClient.findOfferSummaryByIsbn(isbn)
-            val offerSummary = OfferSummary.fromAmazonXml(xml)
+            val offerSummary = Book.availabilityFromAmazonXml(xml)
             if (offerSummary.isDefined) {
               sender ! offerSummary
             }
@@ -276,7 +277,7 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
             }
             osFuture.onSuccess {
               case os => {
-                if (book.offerSummary != os) bookRepository.updateOfferSummary(book, os)
+                if ((book.lowestPrice, book.totalAvailable) != os) bookRepository.updateOfferSummary(book, os)
                 else Logger.info("Did not update OfferSummary for '" + book.title + "' it hasn't changed")
               }
             }
@@ -320,10 +321,6 @@ trait AmazonBookDataRepositoryComponent extends BookDataRepositoryComponent {
       val xml = amazonClient.findByIsbn(isbn)
       try {
         val bookOption = Book.fromAmazonXml(isbn, xml)
-        // bookOption match {
-        //   case Some(bookByIsbn) => println (Book.BookFormat.writes(bookByIsbn))
-        //   case None => println("")
-        //}
         bookOption
       } catch {
         case nfe: NumberFormatException => {

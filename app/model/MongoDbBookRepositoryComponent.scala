@@ -8,6 +8,7 @@ import play.api.libs.json.Json
 import play.api.Play.current
 import concurrent.ExecutionContext.Implicits.global
 import org.bson.types.ObjectId
+import model.Book.OfferSummary
 
 trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
 
@@ -15,7 +16,7 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
 
   class MongoDbBookRepository extends BookRepository {
 
-    private val cacheExpiration = 30
+    private val cacheExpiration = 5
 
     private def getServerAddresses(addresses: String): List[ServerAddress] = {
       addresses match {
@@ -39,7 +40,7 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
     Logger.info("Connecting to MongoDB servers: " + replicaSetServers)
     val client = MongoConnection(replicaSetServers)
 
-    val photobooksDb = client("photobooks") // the name of the database
+    val photobooksDb = client("photobooks-dev") // the name of the database
     Logger.info("Authenticating as user: " + username)
     photobooksDb.authenticate(username, password)
 
@@ -68,7 +69,6 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
       }
     }
 
-
     private def findBookByIsbn(isbn: String): List[Book] = {
       val q = MongoDBObject("isbn" -> isbn)
       findBooks(isbn, q)
@@ -91,7 +91,18 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
     def getOfferSummary(isbn: String): Future[Option[OfferSummary]] = {
       findBookByIsbn(isbn) match {
         case Nil => Future(None)
-        case x :: xs => Future(x.offerSummary)
+        case x :: xs => Future(Some((x.lowestPrice, x.totalAvailable)))
+      }
+    }
+
+    def saveBook(book: Book) {
+      try {
+        booksCollection.save(book, WriteConcern.Safe)
+        Logger.info("Saved book: " + book.title)
+      } catch {
+        case ex: Exception => {
+          Logger.error("Couldn't persist book '" + book.title + "'", ex)
+        }
       }
     }
 
@@ -100,38 +111,32 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
       val idObj = DBObject("_id" -> objId)
       try {
         offerSummary match {
-          case None => booksCollection.update(idObj, $unset(List("offerSummary")), false, false, WriteConcern.Safe)
-          case Some(os) => {
-            os.lowestUsedPrice match {
-              case None => booksCollection.update(idObj, $unset(List("offerSummary.lowestUsedPrice")), false, false, WriteConcern.Safe)
-              case Some(lp) => {
-                booksCollection.update(idObj, $set(List(
-                  "offerSummary.lowestUsedPrice.amount" -> lp.amount,
-                  "offerSummary.lowestUsedPrice.currencyCode" -> lp.currencyCode,
-                  "offerSummary.lowestUsedPrice.formattedPrice" -> lp.formattedPrice
-                )), false, false, WriteConcern.Safe)
-              }
-            }
-            os.lowestNewPrice match {
-              case None => booksCollection.update(idObj, $unset(List("offerSummary.lowestNewPrice")), false, false, WriteConcern.Safe)
-              case Some(lp) => {
-                booksCollection.update(idObj, $set(List(
-                  "offerSummary.lowestNewPrice.amount" -> lp.amount,
-                  "offerSummary.lowestNewPrice.currencyCode" -> lp.currencyCode,
-                  "offerSummary.lowestNewPrice.formattedPrice" -> lp.formattedPrice
-                )), false, false, WriteConcern.Safe)
-              }
-            }
+          case None => {
             booksCollection.update(idObj, $set(List(
-              "offerSummary.totalNew" -> os.totalNew,
-              "offerSummary.totalUsed" -> os.totalUsed
-            )), false, false, WriteConcern.Safe)
-            Logger.info("Updated OfferSummary for '" + book.title + "' with " + os)
+                              "totalAvailable" -> 0
+                            )), false, false, WriteConcern.Safe)
+          }
+          case Some(os) => {
+            os._1 match {
+              case None => {
+                booksCollection.update(idObj, $set(List(
+                  "totalAvailable" -> 0
+                )), false, false, WriteConcern.Safe)
+              }
+              case Some(lp) => {
+                booksCollection.update(idObj, $set(List(
+                  "lowestPrice" -> lp,
+                  "totalAvailable" -> os._2,
+                  "lowestPriceModifiedDate" -> System.currentTimeMillis()
+                )), false, false, WriteConcern.Safe)
+              }
+            }
+            Logger.info("Updated book pricing details for '" + book.title + "' with " + os)
           }
         }
       } catch {
         case ex: Exception => {
-          Logger.error("Couldn't update OfferSummary for '" + book.title + "' with " + offerSummary, ex)
+          Logger.error("Couldn't update book pricing details for '" + book.title + "' with " + offerSummary, ex)
         }
       }
 

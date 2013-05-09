@@ -34,22 +34,19 @@
 
             @helper.inputText(bookForm("publisher"))
 
-            @helper.inputText(bookForm("bookCover.url"))
+            @helper.inputText(bookForm("smallBookCover"))
+
+            @helper.inputText(bookForm("largeBookCover"))
+
+            @helper.checkbox(bookForm("signed"))
+
+            @helper.textarea(bookForm("notes"), args = 'rows -> 4)
 
             <input type="hidden" value="@bookForm("id").value" name="id" id="id"/>
-            <input type="hidden" value="@bookForm("listPrice.formattedPrice").value" name="listPrice.formattedPrice" id="listPrice_formattedPrice"/>
             <input type="hidden" value="@bookForm("listPrice.amount").value" name="listPrice.amount" id="listPrice_amount"/>
-            <input type="hidden" value="@bookForm("listPrice.currencyCode").value" name="listPrice.currencyCode" id="listPrice_currencyCode"/>
-
-            <input type="hidden" value="@bookForm("offerSummary.lowestUsedPrice.formattedPrice").value" name="offerSummary.lowestUsedPrice.formattedPrice" id="offerSummary_lowestUsedPrice_formattedPrice"/>
-            <input type="hidden" value="@bookForm("offerSummary.lowestUsedPrice.amount").value" name="offerSummary.lowestUsedPrice.amount" id="offerSummary_lowestUsedPrice_amount"/>
-            <input type="hidden" value="@bookForm("offerSummary.lowestUsedPrice.currencyCode").value" name="offerSummary.lowestUsedPrice.currencyCode" id="offerSummary_lowestUsedPrice_currencyCode"/>
-            <input type="hidden" value="@bookForm("offerSummary.totalUsed").value" name="offerSummary.totalUsed" id="offerSummary_totalUsed"/>
-
-            <input type="hidden" value="@bookForm("offerSummary.lowestNewPrice.formattedPrice").value" name="offerSummary.lowestNewPrice.formattedPrice" id="offerSummary_lowestNewPrice_formattedPrice"/>
-            <input type="hidden" value="@bookForm("offerSummary.lowestNewPrice.amount").value" name="offerSummary.lowestNewPrice.amount" id="offerSummary_lowestNewPrice_amount"/>
-            <input type="hidden" value="@bookForm("offerSummary.lowestNewPrice.currencyCode").value" name="offerSummary.lowestNewPrice.currencyCode" id="offerSummary_lowestNewPrice_currencyCode"/>
-            <input type="hidden" value="@bookForm("offerSummary.totalNew").value" name="offerSummary.totalNew" id="offerSummary_totalNew"/>
+            <input type="hidden" value="@bookForm("lowestPrice.amount").value" name="lowestPrice.amount" id="lowestPrice_amount"/>
+            <input type="hidden" value="@bookForm("totalAvailable").value" name="totalAvailable" id="totalAvailable"/>
+            <input type="hidden" value="@bookForm("lastPriceUpdateTimestamp").value" name="lastPriceUpdateTimestamp" id="lastPriceUpdateTimestamp"/>
 
             <div class="book-edit-button">
                 <button type="submit" class="btn btn-primary">Save</button>

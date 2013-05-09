@@ -14,14 +14,14 @@
                         case None => {
                             <li class="span2" style="height: 180px">
                                 <a class="thumbnail" rel="tooltip" data-delay="1000" title="@book.title" href="@routes.BookGetController.bookById(book.id.get)">
-                                    <img src="@book.bookCover(170)" caption="@book.title" alt="@book.title"/>
+                                    <img src="@book.smallBookCoverWithDefault" caption="@book.title" alt="@book.title"/>
                                 </a>
                             </li>
                         }
                         case Some(isbn) => {
                             <li class="span2" style="height: 180px">
                                 <a class="thumbnail" rel="tooltip" data-delay="1000" title="@book.title" href="@routes.BookGetController.bookByIsbn(book.isbn.get)">
-                                    <img src="@book.bookCover(170)" caption="@book.title" alt="@book.title"/>
+                                    <img src="@book.smallBookCoverWithDefault" caption="@book.title" alt="@book.title"/>
                                 </a>
                             </li>
                         }
