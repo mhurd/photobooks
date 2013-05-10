@@ -7,6 +7,8 @@ import play.api.libs.json.JsString
 import play.api.Logger
 import com.mongodb.casbah.commons.MongoDBObject
 import com.mongodb.DBObject
+import java.text.SimpleDateFormat
+import java.util.Date
 
 case class Book(id: Option[String],
                 isbn: Option[String],
@@ -69,6 +71,14 @@ case class Book(id: Option[String],
       case Some(price) => "£" + (price / 100).toString
     }
 
+  def displayableLastPriceUpdateTimestamp: String =
+    lastPriceUpdateTimestamp match {
+      case None => "unknown"
+      case Some(timestamp) => Book.dateFormat.format(new Date(timestamp))
+    }
+
+
+
   override def toString = Book.BookFormat.writes(this).toString()
 
 }
@@ -78,6 +88,8 @@ object Book {
   type Price = Option[Int]
   type TotalAvailable = Option[Int]
   type OfferSummary = (Price, TotalAvailable)
+
+  val dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z")
 
   implicit def book2DbObject(book: Book): DBObject =
     MongoDBObject(
