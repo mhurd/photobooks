@@ -27,10 +27,12 @@
                         <dt>ISBN:</dt> <dd>@book.displayableStringOption(book.isbn)</dd>
                         <dt>EAN:</dt> <dd>@book.displayableStringOption(book.ean)</dd>
                         <dt>ID:</dt> <dd>@book.displayableStringOption(book.id)</dd>
-                        <dt>Signed:</dt><dd>@book.signed</dd>
                         <dt>List price:</dt> <dd>@book.displayableListPrice</dd>
                         <dt>Lowest Price:</dt> <dd>@book.displayableLowestPrice <i>(@book.displayableTotalAvailable available)</i></dd>
                         <dt>Price updated:</dt> <dd>@book.displayableLastPriceUpdateTimestamp</dd>
+                        @{if (book.amazonPageUrl.isDefined) {
+                            <dt></dt> <dd style="padding-top: 5px" ><a href={book.amazonPageUrl.get} target="_blank"><img src={routes.Assets.at("images/buy-from-amazon-button.gif").toString} caption="Buy from Amazon" alt="Buy from Amazon"/></a></dd>
+                        }}
                     </dl>
                 </td>
             </tr>

@@ -38,15 +38,12 @@
 
             @helper.inputText(bookForm("largeBookCover"))
 
-            @helper.checkbox(bookForm("signed"))
-
-            @helper.textarea(bookForm("notes"), args = 'rows -> 4)
-
             <input type="hidden" value="@bookForm("id").value" name="id" id="id"/>
-            <input type="hidden" value="@bookForm("listPrice.amount").value" name="listPrice.amount" id="listPrice_amount"/>
-            <input type="hidden" value="@bookForm("lowestPrice.amount").value" name="lowestPrice.amount" id="lowestPrice_amount"/>
+            <input type="hidden" value="@bookForm("listPrice").value" name="listPrice" id="listPrice"/>
+            <input type="hidden" value="@bookForm("lowestPrice").value" name="lowestPrice" id="lowestPrice"/>
             <input type="hidden" value="@bookForm("totalAvailable").value" name="totalAvailable" id="totalAvailable"/>
             <input type="hidden" value="@bookForm("lastPriceUpdateTimestamp").value" name="lastPriceUpdateTimestamp" id="lastPriceUpdateTimestamp"/>
+            <input type="hidden" value="@bookForm("amazonPageUrl").value" name="amazonPageUrl" id="amazonPageUrl"/>
 
             <div class="book-edit-button">
                 <button type="submit" class="btn btn-primary">Save</button>

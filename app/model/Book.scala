@@ -26,8 +26,7 @@ case class Book(id: Option[String],
                 lowestPrice: Option[Int],
                 totalAvailable: Option[Int],
                 lastPriceUpdateTimestamp: Option[Long],
-                signed: Boolean,
-                notes: Option[String]) {
+                amazonPageUrl: Option[String]) {
 
   def noData = "- no data -"
 
@@ -108,8 +107,7 @@ object Book {
       "lowestPrice" -> book.lowestPrice,
       "totalAvailable" -> book.totalAvailable,
       "lastPriceUpdateTimestamp" -> book.lastPriceUpdateTimestamp,
-      "signed" -> book.signed,
-      "notes" -> book.notes
+      "amazonPageUrl" -> book.amazonPageUrl
     )
 
   implicit object BookFormat extends Format[Book] {
@@ -131,8 +129,7 @@ object Book {
       (json \ "lowestPrice").as[Option[Int]],
       (json \ "totalAvailable").as[Option[Int]],
       (json \ "lastPriceUpdateTimestamp").as[Option[Long]],
-      (json \ "signed").as[Boolean],
-      (json \ "notes").as[Option[String]]))
+      (json \ "amazonPageUrl").as[Option[String]]))
 
     def writes(book: Book): JsValue = JsObject(List(
       "isbn" -> Json.toJson(book.isbn),
@@ -150,8 +147,7 @@ object Book {
       "lowestPrice" -> Json.toJson(book.lowestPrice),
       "totalAvailable" -> Json.toJson(book.totalAvailable),
       "lastPriceUpdateTimestamp" -> Json.toJson(book.lastPriceUpdateTimestamp),
-      "signed" -> Json.toJson(book.signed),
-      "notes" -> Json.toJson(book.notes)))
+      "amazonPageUrl" -> Json.toJson(book.amazonPageUrl)))
 
   }
 
@@ -234,8 +230,7 @@ object Book {
             case Some(some) => some._2
           },
           Some(System.currentTimeMillis()),
-          false,
-          None))
+          getOptionText(itemNode \ "DetailPageURL")))
       }
       case _ => {
         Logger.info("Could not find bookByIsbn: " + isbn)

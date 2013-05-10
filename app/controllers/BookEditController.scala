@@ -30,8 +30,7 @@ object BookEditController extends BookController {
       "lowestPrice" -> optional(number),
       "totalAvailable" -> optional(number),
       "lastPriceUpdateTimestamp" -> optional(longNumber()),
-      "signed" -> boolean,
-      "notes" -> optional(text)
+      "amazonPageUrl" -> optional(text)
     )(Book.apply)(Book.unapply)
   )
 
