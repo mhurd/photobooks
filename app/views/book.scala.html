@@ -9,6 +9,9 @@
             case None =>  book.title
             case Some(_) =>   book.title + "  -  " + book.displayableStringOption(book.authors)
         }}</h1>
+        @{if (user.isDefined) {
+            <a href={request.path + "/edit"}><img src={routes.Assets.at("images/edit-button.gif").toString} caption="Edit" alt="Edit"/></a>
+        }}
     </div>
 
     <div id="book">
