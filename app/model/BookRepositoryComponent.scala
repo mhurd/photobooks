@@ -26,6 +26,8 @@ trait BookRepositoryComponent {
 
     def saveBook(book: Book)
 
+    def updateBook(book: Book)
+
   }
 
 }

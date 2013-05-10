@@ -45,6 +45,7 @@ object BookEditController extends BookController {
           Ok(views.html.bookEdit(formWithErrors, googleAnalyticsCode))
         },
         book => {
+          bookRepositoryComponent.bookRepository.updateBook(book)
           Redirect(routes.BookGetController.bookById(book.id.get))
         }
       )

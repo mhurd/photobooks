@@ -107,6 +107,19 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
       }
     }
 
+    def updateBook(book: Book) {
+      try {
+        val objId = new ObjectId(book.id.get)
+        val idObj = DBObject("_id" -> objId)
+        booksCollection.update(idObj, book, false, false, WriteConcern.Safe)
+        Logger.info("Updated book: " + book.title)
+      } catch {
+        case ex: Exception => {
+          Logger.error("Couldn't persist book '" + book.title + "'", ex)
+        }
+      }
+    }
+
     def updateOfferSummary(book: Book, offerSummary: Option[OfferSummary]) {
       val objId = new ObjectId(book.id.get)
       val idObj = DBObject("_id" -> objId)
