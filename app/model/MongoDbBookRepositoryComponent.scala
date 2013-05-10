@@ -125,14 +125,15 @@ trait MongoDbBookRepositoryComponent extends BookRepositoryComponent {
                 )), false, false, WriteConcern.Safe)
               }
               case Some(lp) => {
+                val currentTimestamp = System.currentTimeMillis()
                 booksCollection.update(idObj, $set(List(
                   "lowestPrice" -> lp,
                   "totalAvailable" -> os._2,
-                  "lowestPriceModifiedDate" -> System.currentTimeMillis()
+                  "lowestPriceModifiedDate" -> currentTimestamp
                 )), false, false, WriteConcern.Safe)
+                Logger.info("Updated book pricing details for '" + book.title + "' with " + os)
               }
             }
-            Logger.info("Updated book pricing details for '" + book.title + "' with " + os)
           }
         }
       } catch {
