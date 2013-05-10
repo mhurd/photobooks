@@ -1,4 +1,4 @@
-@(book: model.Book, googleAnalyticsCode: String)(implicit lang: Lang, user: Option[securesocial.core.Identity])
+@(book: model.Book, googleAnalyticsCode: String)(implicit lang: Lang, user: Option[securesocial.core.Identity], request: play.api.mvc.RequestHeader)
 
 @main(book.title, googleAnalyticsCode){
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/book.css")" />
