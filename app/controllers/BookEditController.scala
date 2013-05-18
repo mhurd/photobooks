@@ -12,28 +12,6 @@ import concurrent.Future
 
 object BookEditController extends BookController {
 
-  val bookForm = Form(
-    mapping(
-      "id" -> optional(text),
-      "isbn" -> optional(text),
-      "ean" -> optional(text),
-      "title" -> text,
-      "authors" -> optional(text),
-      "binding" -> optional(text),
-      "edition" -> optional(text),
-      "numberOfPages" -> optional(text),
-      "publicationDate" -> optional(text),
-      "publisher" -> optional(text),
-      "smallBookCover" -> optional(text),
-      "largeBookCover" -> optional(text),
-      "listPrice" -> optional(number),
-      "lowestPrice" -> optional(number),
-      "totalAvailable" -> optional(number),
-      "lastPriceUpdateTimestamp" -> optional(longNumber()),
-      "amazonPageUrl" -> optional(text)
-    )(Book.apply)(Book.unapply)
-  )
-
   def submitWithId(id: String) = SecuredAction(adminUserCheck) {
     implicit request =>
       implicit val user = Some(request.user)

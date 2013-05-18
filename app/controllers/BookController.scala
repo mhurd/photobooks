@@ -1,10 +1,12 @@
 package controllers
 
 import play.api.mvc.Controller
-import model.{AmazonBookDataRepositoryComponent, MongoDbBookRepositoryComponent}
+import model.{Book, AmazonBookDataRepositoryComponent, MongoDbBookRepositoryComponent}
 import play.api.{Logger, Play}
 import scala.concurrent.ExecutionContext
 import ExecutionContext.Implicits.global
+import play.api.data.Form
+import play.api.data.Forms._
 
 class BookController extends Controller with securesocial.core.SecureSocial {
 
@@ -17,6 +19,28 @@ class BookController extends Controller with securesocial.core.SecureSocial {
   def adminUserId = BookController.adminUserId
 
   def adminUserCheck = BookController.adminUserCheck
+
+  val bookForm = Form(
+    mapping(
+      "id" -> optional(text),
+      "isbn" -> optional(text),
+      "ean" -> optional(text),
+      "title" -> text,
+      "authors" -> optional(text),
+      "binding" -> optional(text),
+      "edition" -> optional(text),
+      "numberOfPages" -> optional(text),
+      "publicationDate" -> optional(text),
+      "publisher" -> optional(text),
+      "smallBookCover" -> optional(text),
+      "largeBookCover" -> optional(text),
+      "listPrice" -> optional(number),
+      "lowestPrice" -> optional(number),
+      "totalAvailable" -> optional(number),
+      "lastPriceUpdateTimestamp" -> optional(longNumber()),
+      "amazonPageUrl" -> optional(text)
+    )(Book.apply)(Book.unapply)
+  )
 
 }
 

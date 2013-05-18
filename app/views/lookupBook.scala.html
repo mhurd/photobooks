@@ -1,0 +1,29 @@
+@(lookupBookForm: Form[LookupBookController.FindBook], googleAnalyticsCode: String)(implicit lang: Lang, user: Option[securesocial.core.Identity])
+
+@import helper.twitterBootstrap._
+
+@main("Lookup Book", googleAnalyticsCode){
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/book.css")" />
+}{
+
+    <div id="banner">
+         <h1>Lookup Book</h1>
+    </div>
+    <div id="book">
+        @helper.form(action = routes.LookupBookController.submit()) {
+
+            @lookupBookForm.globalError.map { error =>
+                <span class="error">@error.message</span>
+            }
+
+            @helper.inputText(lookupBookForm("isbn"))
+
+            <div class="book-edit-button">
+                <button type="submit" class="btn btn-primary">Lookup on Amazon</button>
+            </div>
+
+        }
+
+    </div>
+
+}

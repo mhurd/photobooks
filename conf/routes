@@ -8,6 +8,10 @@ GET     /                           controllers.BookGetController.index
 # Book
 GET     /books/$isbn<(\d|X){10}>               controllers.BookGetController.bookByIsbn(isbn: String)
 GET     /books/$isbn<(\d|X){10}>/edit          controllers.BookEditController.editBookByIsbn(isbn: String)
+GET     /books/create                          controllers.BookCreateController.createBook()
+POST    /books/create                          controllers.BookCreateController.submit()
+GET     /books/lookup                          controllers.LookupBookController.lookupBook()
+POST    /books/lookup                          controllers.LookupBookController.submit()
 
 GET     /books/$id<\w{24}>               controllers.BookGetController.bookById(id: String)
 POST    /books/$id<\w{24}>               controllers.BookEditController.submitWithId(id: String)
