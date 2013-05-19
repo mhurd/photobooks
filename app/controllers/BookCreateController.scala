@@ -14,7 +14,7 @@ object BookCreateController extends BookController {
         book => {
           Logger.info("Submitted new book: " + book.title)
           bookRepositoryComponent.bookRepository.saveBook(book)
-          Redirect(routes.BookGetController.bookById(book.id.get))
+          Redirect(routes.BookGetController.index())
         }
       )
   }
