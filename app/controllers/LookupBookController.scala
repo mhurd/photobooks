@@ -34,7 +34,7 @@ object LookupBookController extends BookController {
                 case Nil => NotFound
                 case book :: _ => {
                   val filledForm = bookForm.fill(book)
-                  Ok(views.html.bookEdit(filledForm, googleAnalyticsCode))
+                  Ok(views.html.bookCreate(filledForm, googleAnalyticsCode))
                 }
               }
               )
